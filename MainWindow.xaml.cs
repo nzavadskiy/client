@@ -32,7 +32,92 @@ using System.Globalization;
 using Newtonsoft.Json;
 
 namespace client
-{    
+{
+    [DataContract]
+    public class BaseStation
+    {
+        [DataMember]
+        public string mcc { get; set; }
+        [DataMember]
+        public string mnc { get; set; }
+        [DataMember]
+        public string cellid { get; set; }
+        [DataMember]
+        public string lac { get; set; }
+        [DataMember]
+        public string ip { get; set; }
+        [DataMember]
+        public string port { get; set; }
+        [DataMember]
+        public string lat { get; set; }
+        [DataMember]
+        public string lon { get; set; }
+        public BaseStation() { }
+        public BaseStation(string mcc, string mnc, string cellid, string lac, string ip, string port, string lat, string lon)
+        {
+            this.mcc = mcc;
+            this.mnc = mnc;
+            this.cellid = cellid;
+            this.lac = lac;
+            this.ip = ip;
+            this.port = port;
+            this.lat = lat;
+            this.lon = lon;
+        }
+        public string Serialize()
+        {
+            DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(BaseStation));
+            MemoryStream stream = new MemoryStream();
+            jsonFormatter.WriteObject(stream, this);
+            stream.Position = 0;
+            StreamReader sr = new StreamReader(stream);
+            return sr.ReadToEnd();
+        }
+        public static BaseStation Deserialize(string jsonStr)
+        {
+            DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(BaseStation));
+            MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonStr));
+            return (BaseStation)jsonFormatter.ReadObject(stream);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            BaseStation c = (BaseStation)obj;
+            return mcc == c.mcc && mnc == c.mnc && cellid == c.cellid && lac == c.lac;
+        }
+        public override int GetHashCode()
+        {
+            var hashCode = -1927920976;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(mcc);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(mnc);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(cellid);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(lac);
+            return hashCode;
+        }
+        public void GetBSCoord()
+        {
+            string bsCoordResStr;
+            using (var client = new WebClient())
+            {
+                bsCoordResStr = client.DownloadString(String.Format("https://api.mylnikov.org/geolocation/cell?v=1.1&data=open&mcc={0}&mnc={1}&lac={2}&cellid={3}", mcc, mnc, lac, cellid));
+            }
+            dynamic bsCoordRes = JsonConvert.DeserializeObject(bsCoordResStr);
+            if (bsCoordRes.ContainsKey("data"))
+            {
+                if (bsCoordRes.data.ContainsKey("lat"))
+                {
+                    lat = bsCoordRes.data.lat;
+                }
+                if (bsCoordRes.data.ContainsKey("lon"))
+                {
+                    lon = bsCoordRes.data.lon;
+                }
+            }
+        }
+    }
     [DataContract]
     public class Subscriber
     {
@@ -40,6 +125,8 @@ namespace client
         public string imsi { get; set; }
         [DataMember]
         public string imeiSV { get; set; }
+        [DataMember]
+        public BaseStation BS { get; set; }
         [DataMember]
         public string assistData { get; set; }
         public Subscriber() { }
@@ -78,7 +165,14 @@ namespace client
             Subscriber c = (Subscriber)obj;
             return imsi == c.imsi && imeiSV == c.imeiSV;
         }
-
+        public override int GetHashCode()
+        {
+            var hashCode = -1238749623;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(imsi);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(imeiSV);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(assistData);
+            return hashCode;
+        }
         public void ParseClassmark()
         {
             string cm = assistData;
@@ -170,26 +264,18 @@ namespace client
         }
     }
     [DataContract]
-    public class CellID
+    public class CellID : BaseStation
     {
         [DataMember]
         public string imsi { get; set; }
         [DataMember]
         public string imeiSV { get; set; }
         [DataMember]
-        public string mcc { get; set; }
-        [DataMember]
-        public string mnc { get; set; }
-        [DataMember]
-        public string lac { get; set; }
-        [DataMember]
-        public string cellid { get; set; }
-        [DataMember]
         public string lat { get; set; }
         [DataMember]
         public string lon { get; set; }
 
-        public string Serialize()
+        public new string Serialize()
         {
             DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(CellID));
             MemoryStream stream = new MemoryStream();
@@ -198,32 +284,17 @@ namespace client
             StreamReader sr = new StreamReader(stream);
             return sr.ReadToEnd();
         }
-        public static CellID Deserialize(string jsonStr)
+        public new static CellID Deserialize(string jsonStr)
         {
             DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(CellID));
             MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonStr));
             return (CellID)jsonFormatter.ReadObject(stream);
         }
-        public void GetBSCoord()
-        {
-            string bsCoordResStr;
-            using (var client = new WebClient())
-            {
-                bsCoordResStr = client.DownloadString(String.Format("https://api.mylnikov.org/geolocation/cell?v=1.1&data=open&mcc={0}&mnc={1}&lac={2}&cellid={3}", mcc, mnc, lac, cellid));
-            }
-            dynamic bsCoordRes = JsonConvert.DeserializeObject(bsCoordResStr);
-            if(bsCoordRes.ContainsKey("data"))
-            {
-                if(bsCoordRes.data.ContainsKey("lat"))
-                {
-                    lat = bsCoordRes.data.lat;
-                }
-                if (bsCoordRes.data.ContainsKey("lon"))
-                {
-                    lon = bsCoordRes.data.lon;
-                }
-            }
-        }
+        
+    }
+    public class BaseStationChange
+    {
+        public BaseStation NewBS { get; set; }
     }
     public class SubscribersChange
     {
@@ -260,6 +331,12 @@ namespace client
         {
             this.fact = fact;
             this.time = DateTime.Now.ToLongTimeString();
+        }
+        public LogUnit(BaseStation bs)
+        {
+            this.time = DateTime.Now.ToLongTimeString();
+            this.fact = String.Format("Добавлена базовая станция: MCC = {0}, MNC = {1}, CellID = {2}, LAC = {3}",
+                bs.mcc, bs.mnc, bs.cellid, bs.lac);
         }
         public LogUnit(string fact, Subscriber sub)
         {
@@ -311,6 +388,7 @@ namespace client
         public static TcpClient tc;
         public static NetworkStream stm;
         public static TcpListener listener;
+        public static ISubject<BaseStationChange> bsChange;
         public static ISubject<SubscribersChange> subChange;
         public static ISubject<GeolocationChange> geoChange;
         public static ISubject<TAChange> taChange;
@@ -330,6 +408,7 @@ namespace client
         }
         public static void Start()
         {
+            bsChange = new Subject<BaseStationChange>();
             subChange = new Subject<SubscribersChange>();
             geoChange = new Subject<GeolocationChange>();
             taChange = new Subject<TAChange>();
@@ -337,6 +416,7 @@ namespace client
             logChange = new Subject<LogChange>();
             subChange.Where(c => c.AddRemove == "+").Subscribe(MainWindow.AddNewSub);
             subChange.Where(c => c.AddRemove == "-").Subscribe(MainWindow.RemoveSub);
+            bsChange.Subscribe(MainWindow.AddNewBS);
             geoChange.Subscribe(MainWindow.AddNewGeo);
             taChange.Subscribe(MainWindow.AddNewTA);
             cellidChange.Subscribe(MainWindow.AddNewCellID);
@@ -348,6 +428,12 @@ namespace client
                 listener = new TcpListener(ip, port);
                 listener.Start();
                 isStarted = true;
+                string tempIp = "";
+                string tempPort = "";
+                string tempMCC = "";
+                string tempMNC = "";
+                string tempLAC = "";
+                string tempCellID = "";
                 while (true)
                 {
                     tc = listener.AcceptTcpClient();
@@ -355,12 +441,36 @@ namespace client
                     byte[] readBuf = new byte[1024];
                     int count = stm.Read(readBuf, 0, 1024);
                     string mail = Encoding.ASCII.GetString(readBuf, 0, count);
-                    Subscriber sub;
+                    Subscriber sub;                    
                     switch (mail[0])
                     {
+                        case '1':
+                            BaseStation bs = BaseStation.Deserialize(mail.Substring(1));
+                            //if (tempIp != bs.ip || tempPort != bs.port)
+                            //{
+                                tempIp = bs.ip;
+                                tempPort = bs.port;
+                                Client.client = new TcpClient(bs.ip, Int32.Parse(bs.port));
+                                Client.stream = Client.client.GetStream();
+                            //}
+                            //else
+                            //{
+                            //    bs.GetBSCoord();                            
+                            //    bsChange.OnNext(new BaseStationChange() { NewBS = bs });
+                            //}
+                            break;
                         case '2':
                             sub = Subscriber.Deserialize(mail.Substring(1));
                             sub.ParseClassmark();
+                            if (tempMCC != sub.BS.mcc || tempMNC != sub.BS.mnc || tempLAC != sub.BS.lac || tempCellID != sub.BS.cellid)
+                            {
+                                tempMCC = sub.BS.mcc;
+                                tempMNC = sub.BS.mnc;
+                                tempLAC = sub.BS.lac;
+                                tempCellID = sub.BS.cellid;
+                                sub.BS.GetBSCoord();
+                                bsChange.OnNext(new BaseStationChange() { NewBS = sub.BS });
+                            }
                             subChange.OnNext(new SubscribersChange() { AddRemove = "+", NewSub = sub });
                             break;
                         case '3':
@@ -438,6 +548,7 @@ namespace client
         public static int latencyTime = 1;
         public static Thread serverThread;
         public static Thread assistThread;
+        public static ObservableCollection<BaseStation> bss;
         public static ObservableCollection<Subscriber> subs;
         public static ObservableCollection<Geolocation> geos;
         public static ObservableCollection<TA> tas;
@@ -463,38 +574,52 @@ namespace client
         {
             try
             {
+                System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvBaseStations.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
                 System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvGeolocation.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
                 System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvSubscribers.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
                 qParams = new QueryParameters("7", "7", "15", "55", "37", "0", "24", "0.1");
+                bss = new ObservableCollection<BaseStation>();
                 subs = new ObservableCollection<Subscriber>();
                 geos = new ObservableCollection<Geolocation>();
                 tas = new ObservableCollection<TA>();
                 cellids = new ObservableCollection<CellID>();
                 log = new ObservableCollection<LogUnit>();
+                bss.CollectionChanged += BS_CollectionChanged;
                 subs.CollectionChanged += Subs_CollectionChanged;
                 geos.CollectionChanged += Geos_CollectionChanged;
                 tas.CollectionChanged += TAs_CollectionChanged;
                 cellids.CollectionChanged += CellIDs_CollectionChanged;
                 log.CollectionChanged += Log_CollectionChanged;
+                lvBaseStations.ItemsSource = bss;
+
                 lvSubscribers.ItemsSource = subs;
+                CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lvSubscribers.ItemsSource);
+                PropertyGroupDescription groupDescriptionMCC = new PropertyGroupDescription("BS.mcc");
+                PropertyGroupDescription groupDescriptionMNC = new PropertyGroupDescription("BS.mnc");
+                PropertyGroupDescription groupDescriptionLAC = new PropertyGroupDescription("BS.lac");
+                PropertyGroupDescription groupDescriptionCellID = new PropertyGroupDescription("BS.cellid");
+                view.GroupDescriptions.Add(groupDescriptionMCC);
+                view.GroupDescriptions.Add(groupDescriptionMNC);
+                view.GroupDescriptions.Add(groupDescriptionLAC);
+                view.GroupDescriptions.Add(groupDescriptionCellID);
+
                 lvGeolocation.ItemsSource = geos;
                 lvTA.ItemsSource = tas;
                 lvCellID.ItemsSource = cellids;
                 lvLog.ItemsSource = log;
-                cbMapSubs.ItemsSource = subs;
-                Client.client = new TcpClient("localhost", 8080);
-                Client.stream = Client.client.GetStream();
+                cbMapSubs.ItemsSource = subs;                
                 serverThread = new Thread(new ThreadStart(Server.Start));
                 serverThread.Start();
-                Client.SendMessage("18081");
-                if (Client.GetMessage() == "0")
-                {
-                    Logging("Подключено к серверу");
-                }
-
-                assistInformation = SplitAssist.Split(ParseAssist(GetAssistFromInet())); // только с подключением к rrlp-серверу
-                assistThread = new Thread(new ThreadStart(RenewAssistDataPeriodically));
-                assistThread.Start();
+                //Client.client = new TcpClient("localhost", 8080);
+                //Client.stream = Client.client.GetStream();
+                //Client.SendMessage("18081");
+                //if (Client.GetMessage() == "0")
+                //{
+                //    Logging("Подключено к серверу");
+                //}
+                //assistInformation = SplitAssist.Split(ParseAssist(GetAssistFromInet())); // только с подключением к rrlp-серверу
+                //assistThread = new Thread(new ThreadStart(RenewAssistDataPeriodically));
+                //assistThread.Start();
             }
             catch (Exception e1)
             {
@@ -553,6 +678,18 @@ namespace client
         {
             tbStatus.Text = factToStatus;
             log.Add(new LogUnit(factToLog));
+        }
+        private void BS_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    BaseStation newBS = e.NewItems[0] as BaseStation;
+                    log.Add(new LogUnit(newBS));                    
+                    //Client.SendMessage("1");
+                    //Client.GetMessage();
+                    break;
+            }
         }
         private void Subs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -864,6 +1001,13 @@ namespace client
             App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
                 subs.Remove(Subs.NewSub);
+            });
+        }
+        public static void AddNewBS(BaseStationChange BSs)
+        {
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                bss.Add(BSs.NewBS);
             });
         }
         public static void AddNewGeo(GeolocationChange Geos)

@@ -31,6 +31,20 @@
         <ListBox Name="lbLog" Grid.Row="1" Grid.Column="2">
         </ListBox>
         <TabControl Name="tcInfo" Grid.Row="1" Grid.Column="0">
+            <TabItem Header="Базовые станции">
+                <ListView Name="lvBaseStations" x:FieldModifier="public">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=mcc}">MCC</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=mnc}">MNC</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=lac}">LAC</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=cellid}">Cell ID</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
             <TabItem Header="Абоненты">
                 <ListView Name="lvSubscribers" x:FieldModifier="public">
                     <ListView.View>
@@ -40,6 +54,15 @@
                             <GridViewColumn DisplayMemberBinding="{Binding Path=assistData}"  Width="Auto">Доступные методы</GridViewColumn>
                         </GridView>
                     </ListView.View>
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Получить данные о местоположении">
