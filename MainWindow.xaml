@@ -21,6 +21,14 @@
         <Menu Grid.Row="0" VerticalAlignment="Top" Height="18" Grid.ColumnSpan="3">
             <MenuItem Header="Меню">
                 <MenuItem x:Name="menuStartTestClient" Header="Старт" Click="MenuStartTestClient_Click"></MenuItem>
+                <MenuItem x:Name="menuGetGeoAll" Header="Определить местоположение всех абонентов">
+                    <MenuItem Header="MS-Based GPS" Click="MiGetMsbGPSAll"></MenuItem>
+                    <MenuItem Header="MS-Assisted GPS" Click="MiGetMsaGPSAll"></MenuItem>
+                    <MenuItem Header="MS-Based E-OTD" Click="MiGetMsbEOTDAll"></MenuItem>
+                    <MenuItem Header="MS-Assisted E-OTD" Click="MiGetMsaEOTDAll"></MenuItem>
+                    <MenuItem Header="По параметру TA" Click="MiGetTAAll"></MenuItem>
+                    <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellIDAll"></MenuItem>
+                </MenuItem>
                 <MenuItem x:Name="menuSetParams" Header="Настройка параметров запроса" Click="MenuSetParams_Click"></MenuItem>
             </MenuItem>
         </Menu>
@@ -35,10 +43,12 @@
                 <ListView Name="lvBaseStations" x:FieldModifier="public">
                     <ListView.View>
                         <GridView>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=name}">Имя</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=mcc}">MCC</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=mnc}">MNC</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=lac}">LAC</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=cellid}">Cell ID</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=antenna}">Антенна</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
                         </GridView>
@@ -51,6 +61,7 @@
                         <GridView>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}"  Width="Auto">IMSI</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}"  Width="Auto">IMEI-SV</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=subName}"  Width="Auto">Имя</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=assistData}"  Width="Auto">Доступные методы</GridViewColumn>
                         </GridView>
                     </ListView.View>
@@ -71,7 +82,7 @@
                                 <MenuItem Header="MS-Based E-OTD" Click="MiGetMsbEOTD"></MenuItem>
                                 <MenuItem Header="MS-Assisted E-OTD" Click="MiGetMsaEOTD"></MenuItem>
                                 <MenuItem Header="По параметру TA" Click="MiGetTA"></MenuItem>
-                                <MenuItem Header="По параметру Cell ID" Click="MiGetCellID"></MenuItem>
+                                <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellID"></MenuItem>
                             </MenuItem>
                             <MenuItem Header="Получать местоположение периодически">
                                 <MenuItem Header="MS-Based GPS" Click="MiGetPerMsbGPS"></MenuItem>
@@ -79,7 +90,7 @@
                                 <MenuItem Header="MS-Based E-OTD" Click="MiGetPerMsbEOTD"></MenuItem>
                                 <MenuItem Header="MS-Assisted E-OTD" Click="MiGetPerMsaEOTD"></MenuItem>
                                 <MenuItem Header="По параметру TA" Click="MiGetPerTA"></MenuItem>
-                                <MenuItem Header="По параметру Cell ID" Click="MiGetPerCellID"></MenuItem>
+                                <MenuItem Header="Расстояние до базовой станции" Click="MiGetPerCellID"></MenuItem>
                             </MenuItem>
                             <MenuItem Header="Остановить процедуру периодического получения местоположения" Click="MiStopGeoPeriod_Click"></MenuItem>
                         </ContextMenu>
@@ -123,12 +134,10 @@
                         <GridView>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
                             <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=mcc}">MCC</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=mnc}">MNC</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lac}">LAC</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=cellid}">Cell ID</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Latitude</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Longitude</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=bsName}">Имя БС</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=dist}">Расстояние</GridViewColumn>
                          </GridView>
                     </ListView.View>
                 </ListView>

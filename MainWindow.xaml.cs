@@ -37,6 +37,8 @@ namespace client
     public class BaseStation
     {
         [DataMember]
+        public string name { get; set; }
+        [DataMember]
         public string mcc { get; set; }
         [DataMember]
         public string mnc { get; set; }
@@ -45,24 +47,29 @@ namespace client
         [DataMember]
         public string lac { get; set; }
         [DataMember]
-        public string ip { get; set; }
-        [DataMember]
-        public string port { get; set; }
-        [DataMember]
         public string lat { get; set; }
         [DataMember]
         public string lon { get; set; }
+        [DataMember]
+        public string antenna { get; set; }
+        [DataMember]
+        public string ip { get; set; }
+        [DataMember]
+        public string port { get; set; }
+        
         public BaseStation() { }
-        public BaseStation(string mcc, string mnc, string cellid, string lac, string ip, string port, string lat, string lon)
+        public BaseStation(string name, string mcc, string mnc, string cellid, string lac, string lat, string lon, string antenna, string ip, string port)
         {
+            this.name = name;
             this.mcc = mcc;
             this.mnc = mnc;
             this.cellid = cellid;
             this.lac = lac;
-            this.ip = ip;
-            this.port = port;
             this.lat = lat;
             this.lon = lon;
+            this.antenna = antenna;
+            this.ip = ip;
+            this.port = port;
         }
         public string Serialize()
         {
@@ -126,9 +133,11 @@ namespace client
         [DataMember]
         public string imeiSV { get; set; }
         [DataMember]
-        public BaseStation BS { get; set; }
+        public string subName { get; set; }
         [DataMember]
         public string assistData { get; set; }
+        [DataMember]
+        public string bsName { get; set; }
         public Subscriber() { }
         public Subscriber(string imsi, string imeiSV)
         {
@@ -264,16 +273,20 @@ namespace client
         }
     }
     [DataContract]
-    public class CellID : BaseStation
+    public class CellID
     {
         [DataMember]
         public string imsi { get; set; }
         [DataMember]
         public string imeiSV { get; set; }
         [DataMember]
+        public string bsName { get; set; }
+        [DataMember]
         public string lat { get; set; }
         [DataMember]
         public string lon { get; set; }
+        [DataMember]
+        public string dist { get; set; }
 
         public new string Serialize()
         {
@@ -290,7 +303,7 @@ namespace client
             MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonStr));
             return (CellID)jsonFormatter.ReadObject(stream);
         }
-        
+
     }
     public class BaseStationChange
     {
@@ -428,12 +441,6 @@ namespace client
                 listener = new TcpListener(ip, port);
                 listener.Start();
                 isStarted = true;
-                string tempIp = "";
-                string tempPort = "";
-                string tempMCC = "";
-                string tempMNC = "";
-                string tempLAC = "";
-                string tempCellID = "";
                 while (true)
                 {
                     tc = listener.AcceptTcpClient();
@@ -441,64 +448,78 @@ namespace client
                     byte[] readBuf = new byte[1024];
                     int count = stm.Read(readBuf, 0, 1024);
                     string mail = Encoding.ASCII.GetString(readBuf, 0, count);
-                    Subscriber sub;                    
+                    Subscriber sub;
+                    BaseStation request;
                     switch (mail[0])
                     {
+                        case '0':
+                            request = BaseStation.Deserialize(mail.Substring(1));
+                            Client.client = new TcpClient(request.ip, Int32.Parse(request.port));
+                            Client.stream = Client.client.GetStream();
+                            break;
                         case '1':
-                            BaseStation bs = BaseStation.Deserialize(mail.Substring(1));
-                            //if (tempIp != bs.ip || tempPort != bs.port)
-                            //{
-                                tempIp = bs.ip;
-                                tempPort = bs.port;
-                                Client.client = new TcpClient(bs.ip, Int32.Parse(bs.port));
-                                Client.stream = Client.client.GetStream();
-                            //}
-                            //else
-                            //{
-                            //    bs.GetBSCoord();                            
-                            //    bsChange.OnNext(new BaseStationChange() { NewBS = bs });
-                            //}
+                            switch (mail[1])
+                            {
+                                case '1':
+                                    BaseStation bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bsChange.OnNext(new BaseStationChange() { NewBS = bs });
+                                    break;
+                                case '2':
+                                    break;
+                                case '3':
+                                    break;
+                            }
                             break;
                         case '2':
-                            sub = Subscriber.Deserialize(mail.Substring(1));
-                            sub.ParseClassmark();
-                            if (tempMCC != sub.BS.mcc || tempMNC != sub.BS.mnc || tempLAC != sub.BS.lac || tempCellID != sub.BS.cellid)
+                            switch (mail[1])
                             {
-                                tempMCC = sub.BS.mcc;
-                                tempMNC = sub.BS.mnc;
-                                tempLAC = sub.BS.lac;
-                                tempCellID = sub.BS.cellid;
-                                sub.BS.GetBSCoord();
-                                bsChange.OnNext(new BaseStationChange() { NewBS = sub.BS });
+                                case '1':
+                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    sub.ParseClassmark();
+                                    subChange.OnNext(new SubscribersChange() { AddRemove = "+", NewSub = sub });
+                                    break;
+                                case '2':
+                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    subChange.OnNext(new SubscribersChange() { AddRemove = "-", NewSub = sub });
+                                    break;
                             }
-                            subChange.OnNext(new SubscribersChange() { AddRemove = "+", NewSub = sub });
-                            break;
+                            break;                            
                         case '3':
-                            sub = Subscriber.Deserialize(mail.Substring(1));
-                            geoChange.OnNext(new GeolocationChange() { NewGeo = SplitAssist.GetGeolocation(sub) });
+                            switch (mail[1])
+                            {
+                                case '1':
+                                    TA ta = TA.Deserialize(mail.Substring(2));
+                                    taChange.OnNext(new TAChange() { NewTA = ta });
+                                    break;
+                                case '2':
+                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    geoChange.OnNext(new GeolocationChange() { NewGeo = SplitAssist.GetGeolocation(sub) });
+                                    break;
+                                case '3':
+                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    string res;
+                                    using (var client = new WebClient())
+                                    {
+                                        res = client.DownloadString(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?query=decode&apdu=" + sub.assistData);
+                                        //res = client.DownloadString(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?query=apdu&apdu=" + sub.assistData);
+                                    }
+                                    logChange.OnNext(new LogChange() { NewLog = new LogUnit(String.Format(
+                                        "Получены измерения местоположения для абонента: IMSI = {0}, IMEI-SV = {1} - {2}", sub.imsi, sub.imeiSV, res)) });
+                                    break;
+                            }                            
                             break;
                         case '4':
-                            sub = Subscriber.Deserialize(mail.Substring(1));
-                            subChange.OnNext(new SubscribersChange() { AddRemove = "-", NewSub = sub });
+                            request = BaseStation.Deserialize(mail.Substring(1));
+                            //removing
                             break;
-                        case '5':
-                            TA ta = TA.Deserialize(mail.Substring(1));
-                            taChange.OnNext(new TAChange() { NewTA = ta });
-                            break;
-                        case '6':
-                            CellID cellid = CellID.Deserialize(mail.Substring(1));
-                            cellid.GetBSCoord();
-                            cellidChange.OnNext(new CellIDChange() { NewCellID = cellid });
-                            break;
-                        case '7':
-                            sub = Subscriber.Deserialize(mail.Substring(1));
-                            string res;
-                            using (var client = new WebClient())
+                        case '9':
+                            switch (mail[1])
                             {
-                                res = client.DownloadString(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?query=decode&apdu=" + sub.assistData);
-                                //res = client.DownloadString(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?query=apdu&apdu=" + sub.assistData);
+                                case '0':
+                                    break;
+                                case '1':
+                                    break;
                             }
-                            logChange.OnNext(new LogChange() { NewLog = new LogUnit(String.Format("Получены измерения местоположения для абонента: IMSI = {0}, IMEI-SV = {1} - {2}", sub.imsi, sub.imeiSV, res)) });
                             break;
                     }
                     stm.Write(readBuf, 0, 1024);
@@ -594,14 +615,8 @@ namespace client
 
                 lvSubscribers.ItemsSource = subs;
                 CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lvSubscribers.ItemsSource);
-                PropertyGroupDescription groupDescriptionMCC = new PropertyGroupDescription("BS.mcc");
-                PropertyGroupDescription groupDescriptionMNC = new PropertyGroupDescription("BS.mnc");
-                PropertyGroupDescription groupDescriptionLAC = new PropertyGroupDescription("BS.lac");
-                PropertyGroupDescription groupDescriptionCellID = new PropertyGroupDescription("BS.cellid");
-                view.GroupDescriptions.Add(groupDescriptionMCC);
-                view.GroupDescriptions.Add(groupDescriptionMNC);
-                view.GroupDescriptions.Add(groupDescriptionLAC);
-                view.GroupDescriptions.Add(groupDescriptionCellID);
+                PropertyGroupDescription groupDescriptionBsName = new PropertyGroupDescription("bsName");
+                view.GroupDescriptions.Add(groupDescriptionBsName);
 
                 lvGeolocation.ItemsSource = geos;
                 lvTA.ItemsSource = tas;
@@ -685,9 +700,7 @@ namespace client
             {
                 case NotifyCollectionChangedAction.Add:
                     BaseStation newBS = e.NewItems[0] as BaseStation;
-                    log.Add(new LogUnit(newBS));                    
-                    //Client.SendMessage("1");
-                    //Client.GetMessage();
+                    log.Add(new LogUnit(newBS));
                     break;
             }
         }
@@ -772,7 +785,7 @@ namespace client
                 res.Add(m.Value.Substring(5));
             }
             return res;
-        }              
+        }
         private void MenuSetParams_Click(object sender, RoutedEventArgs e)
         {
             SetQueryParameters setQueryParameters = new SetQueryParameters
@@ -783,13 +796,7 @@ namespace client
         }
         private void GetGeolocation(string assist)
         {
-            Subscriber sub = new Subscriber();
-            sub = (Subscriber)lvSubscribers.SelectedItem;
-            sub.assistData = assist;
-            Client.SendMessage("2" + sub.Serialize());
-            string res = Client.GetMessage();
-            if (res == "0")
-                Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
+            GetGeolocation(1, assist);
         }
         private void GetGeolocation(int num, string assist)
         {
@@ -798,8 +805,23 @@ namespace client
             sub.assistData = assist;
             Client.SendMessage(num.ToString() + sub.Serialize());
             string res = Client.GetMessage();
-            if (res == "0")
+            if (res == "90")
                 Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
+        }
+        private void GetGeolocationAll(string assist)
+        {
+            GetGeolocationAll(1, assist);
+        }
+        private void GetGeolocationAll(int num, string assist)
+        {
+            foreach (Subscriber sub in subs)
+            {
+                sub.assistData = assist;
+                Client.SendMessage(num.ToString() + sub.Serialize());
+                string res = Client.GetMessage();
+                if (res == "90")
+                    Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
+            }
         }
         private void MiGetMsbGPS(object sender, RoutedEventArgs e)
         {
@@ -819,11 +841,35 @@ namespace client
         }
         private void MiGetTA(object sender, RoutedEventArgs e)
         {
-            GetGeolocation(5, "");
+            GetGeolocation(2, "");
         }
         private void MiGetCellID(object sender, RoutedEventArgs e)
         {
             GetGeolocation(6, "");
+        }
+        private void MiGetMsbGPSAll(object sender, RoutedEventArgs e)
+        {
+            GetGeolocationAll("ms-based gps");
+        }
+        private void MiGetMsaGPSAll(object sender, RoutedEventArgs e)
+        {
+            GetGeolocationAll("ms-assisted gps");
+        }
+        private void MiGetMsbEOTDAll(object sender, RoutedEventArgs e)
+        {
+            GetGeolocationAll("ms-based e-otd");
+        }
+        private void MiGetMsaEOTDAll(object sender, RoutedEventArgs e)
+        {
+            GetGeolocationAll("ms-assisted e-otd");
+        }
+        private void MiGetTAAll(object sender, RoutedEventArgs e)
+        {
+            GetGeolocationAll(2, "");
+        }
+        private void MiGetCellIDAll(object sender, RoutedEventArgs e)
+        {
+            GetGeolocationAll(6, "");
         }
         private void MiGetPerMsbGPS(object sender, RoutedEventArgs e)
         {
