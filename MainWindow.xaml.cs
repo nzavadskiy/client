@@ -93,16 +93,7 @@ namespace client
                 return false;
             }
             BaseStation c = (BaseStation)obj;
-            return mcc == c.mcc && mnc == c.mnc && cellid == c.cellid && lac == c.lac;
-        }
-        public override int GetHashCode()
-        {
-            var hashCode = -1927920976;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(mcc);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(mnc);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(cellid);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(lac);
-            return hashCode;
+            return name == c.name;
         }
         public void GetBSCoord()
         {
@@ -123,6 +114,11 @@ namespace client
                     lon = bsCoordRes.data.lon;
                 }
             }
+        }
+
+        public override int GetHashCode()
+        {
+            return 363513814 + EqualityComparer<string>.Default.GetHashCode(name);
         }
     }
     [DataContract]
@@ -307,6 +303,7 @@ namespace client
     }
     public class BaseStationChange
     {
+        public string AddRemove { get; set; }
         public BaseStation NewBS { get; set; }
     }
     public class SubscribersChange
@@ -345,11 +342,11 @@ namespace client
             this.fact = fact;
             this.time = DateTime.Now.ToLongTimeString();
         }
-        public LogUnit(BaseStation bs)
+        public LogUnit(string fact, BaseStation bs)
         {
             this.time = DateTime.Now.ToLongTimeString();
-            this.fact = String.Format("Добавлена базовая станция: MCC = {0}, MNC = {1}, CellID = {2}, LAC = {3}",
-                bs.mcc, bs.mnc, bs.cellid, bs.lac);
+            this.fact = String.Format("{0} базовая станция:Имя = {1}, MCC = {2}, MNC = {3}, CellID = {4}, LAC = {5}",
+                fact, bs.name, bs.mcc, bs.mnc, bs.cellid, bs.lac);
         }
         public LogUnit(string fact, Subscriber sub)
         {
@@ -429,7 +426,10 @@ namespace client
             logChange = new Subject<LogChange>();
             subChange.Where(c => c.AddRemove == "+").Subscribe(MainWindow.AddNewSub);
             subChange.Where(c => c.AddRemove == "-").Subscribe(MainWindow.RemoveSub);
-            bsChange.Subscribe(MainWindow.AddNewBS);
+            bsChange.Where(c => c.AddRemove == "+").Subscribe(MainWindow.AddNewBS);
+            bsChange.Where(c => c.AddRemove == "-").Subscribe(MainWindow.RemoveBS);
+            bsChange.Where(c => c.AddRemove == "+-").Subscribe(MainWindow.AlterBS);
+            bsChange.Where(c => c.AddRemove == "-all").Subscribe(MainWindow.RemoveAllBS);
             geoChange.Subscribe(MainWindow.AddNewGeo);
             taChange.Subscribe(MainWindow.AddNewTA);
             cellidChange.Subscribe(MainWindow.AddNewCellID);
@@ -449,24 +449,28 @@ namespace client
                     int count = stm.Read(readBuf, 0, 1024);
                     string mail = Encoding.ASCII.GetString(readBuf, 0, count);
                     Subscriber sub;
-                    BaseStation request;
+                    BaseStation bs;
                     switch (mail[0])
                     {
                         case '0':
-                            request = BaseStation.Deserialize(mail.Substring(1));
-                            Client.client = new TcpClient(request.ip, Int32.Parse(request.port));
+                            bs = BaseStation.Deserialize(mail.Substring(1));
+                            Client.client = new TcpClient(bs.ip, Int32.Parse(bs.port));
                             Client.stream = Client.client.GetStream();
                             break;
                         case '1':
                             switch (mail[1])
                             {
                                 case '1':
-                                    BaseStation bs = BaseStation.Deserialize(mail.Substring(2));
-                                    bsChange.OnNext(new BaseStationChange() { NewBS = bs });
+                                    bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bsChange.OnNext(new BaseStationChange() { AddRemove = "+", NewBS = bs });
                                     break;
                                 case '2':
+                                    bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bsChange.OnNext(new BaseStationChange() { AddRemove = "-", NewBS = bs });
                                     break;
                                 case '3':
+                                    bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bsChange.OnNext(new BaseStationChange() { AddRemove = "+-", NewBS = bs });
                                     break;
                             }
                             break;
@@ -509,8 +513,8 @@ namespace client
                             }                            
                             break;
                         case '4':
-                            request = BaseStation.Deserialize(mail.Substring(1));
-                            //removing
+                            bs = BaseStation.Deserialize(mail.Substring(1));
+                            bsChange.OnNext(new BaseStationChange() { AddRemove = "-all", NewBS = bs });
                             break;
                         case '9':
                             switch (mail[1])
@@ -700,7 +704,16 @@ namespace client
             {
                 case NotifyCollectionChangedAction.Add:
                     BaseStation newBS = e.NewItems[0] as BaseStation;
-                    log.Add(new LogUnit(newBS));
+                    log.Add(new LogUnit("Добавлена", newBS));
+                    break;                    
+                case NotifyCollectionChangedAction.Remove:
+                    BaseStation oldBS = e.OldItems[0] as BaseStation;
+                    log.Add(new LogUnit("Удалена", oldBS));
+                    var subsForRemove = subs.Where(s => s.bsName == oldBS.name).ToList();
+                    foreach(Subscriber sub in subsForRemove)
+                    {
+                        subs.Remove(sub);
+                    }
                     break;
             }
         }
@@ -1054,6 +1067,45 @@ namespace client
             App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
                 bss.Add(BSs.NewBS);
+            });
+        }
+        public static void RemoveBS(BaseStationChange BSs)
+        {
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                bss.Remove(BSs.NewBS);
+            });
+        }
+        public static void AlterBS(BaseStationChange BSs)
+        {
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                foreach(BaseStation bs in bss.Where(b => b.name == BSs.NewBS.name))
+                {
+                    if (BSs.NewBS.mcc != "")
+                        bs.mcc = BSs.NewBS.mcc;
+                    if (BSs.NewBS.mnc != "")
+                        bs.mnc = BSs.NewBS.mnc;
+                    if (BSs.NewBS.lac != "")
+                        bs.lac = BSs.NewBS.lac;
+                    if (BSs.NewBS.cellid != "")
+                        bs.cellid = BSs.NewBS.cellid;
+                    if (BSs.NewBS.lat != "")
+                        bs.lat = BSs.NewBS.lat;
+                    if (BSs.NewBS.lon != "")
+                        bs.lon = BSs.NewBS.lon;
+                    if (BSs.NewBS.antenna != "")
+                        bs.antenna = BSs.NewBS.antenna;
+                }
+            });
+        }
+        public static void RemoveAllBS(BaseStationChange BSs)
+        {
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                var bssToRemove = bss.Where(b => b.ip == BSs.NewBS.ip && b.port == BSs.NewBS.port).ToList();
+                foreach (var bs in bssToRemove)
+                    bss.Remove(bs);
             });
         }
         public static void AddNewGeo(GeolocationChange Geos)
