@@ -393,31 +393,37 @@ namespace client
             client.Close();
         }
     }
-    public static class Server
+    public class StateObject // State object for reading client data asynchronously
     {
-        public static TcpClient tc;
-        public static NetworkStream stm;
-        public static TcpListener listener;
+        // Client  socket.  
+        public Socket workSocket = null;
+        // Size of receive buffer.  
+        public const int BufferSize = 1024;
+        // Receive buffer.  
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.  
+        public StringBuilder sb = new StringBuilder();
+    }
+    public class AsynchronousSocketListener
+    {
         public static ISubject<BaseStationChange> bsChange;
         public static ISubject<SubscribersChange> subChange;
         public static ISubject<GeolocationChange> geoChange;
         public static ISubject<TAChange> taChange;
         public static ISubject<CellIDChange> cellidChange;
         public static ISubject<LogChange> logChange;
-        public static bool isStarted = false;
-        public static void Stop()
+
+        public static volatile bool listening = true;
+
+        // Thread signal.  
+        public static ManualResetEvent allDone = new ManualResetEvent(false);
+
+        public AsynchronousSocketListener()
         {
-            if (tc.Connected)
-                tc.Close();
-            if (isStarted)
-            {
-                stm.Close();
-                listener.Stop();
-            }            
-            isStarted = false;
         }
-        public static void Start()
-        {
+
+        public static void StartListening()
+        {            
             bsChange = new Subject<BaseStationChange>();
             subChange = new Subject<SubscribersChange>();
             geoChange = new Subject<GeolocationChange>();
@@ -434,90 +440,166 @@ namespace client
             taChange.Subscribe(MainWindow.AddNewTA);
             cellidChange.Subscribe(MainWindow.AddNewCellID);
             logChange.Subscribe(MainWindow.AddNewLog);
+
+            // Establish the local endpoint for the socket.  
+            // The DNS name of the computer  
+            // running the listener is "host.contoso.com".  
+            //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            //IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8081);
+
+            // Create a TCP/IP socket.  
+            Socket listener = new Socket(ipAddress.AddressFamily,
+                SocketType.Stream, ProtocolType.Tcp);
+
+            // Bind the socket to the local endpoint and listen for incoming connections.  
             try
             {
-                IPAddress ip = IPAddress.Parse("127.0.0.1");
-                int port = 8081;
-                listener = new TcpListener(ip, port);
-                listener.Start();
-                isStarted = true;
-                while (true)
+                listener.Bind(localEndPoint);
+                listener.Listen(100);
+
+                while (listening)
                 {
-                    tc = listener.AcceptTcpClient();
-                    stm = tc.GetStream();
-                    byte[] readBuf = new byte[1024];
-                    int count = stm.Read(readBuf, 0, 1024);
-                    string mail = Encoding.ASCII.GetString(readBuf, 0, count);
+                    // Set the event to nonsignaled state.  
+                    allDone.Reset();
+
+                    // Start an asynchronous socket to listen for connections.  
+                    Console.WriteLine("Waiting for a connection...");
+                    listener.BeginAccept(
+                        new AsyncCallback(AcceptCallback),
+                        listener);
+
+                    // Wait until a connection is made before continuing.  
+                    allDone.WaitOne();
+                }
+
+            }
+            catch (Exception e)
+            {
+                logChange.OnNext(new LogChange() { NewLog = new LogUnit(e.Message) });
+            }
+
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
+
+        }
+
+        public static void AcceptCallback(IAsyncResult ar)
+        {
+            // Signal the main thread to continue.  
+            allDone.Set();
+
+            // Get the socket that handles the client request.  
+            Socket listener = (Socket)ar.AsyncState;
+            Socket handler = listener.EndAccept(ar);
+
+            // Create the state object.  
+            StateObject state = new StateObject();
+            state.workSocket = handler;
+            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                new AsyncCallback(ReadCallback), state);
+        }
+
+        public static void ReadCallback(IAsyncResult ar)
+        {
+            String content = String.Empty;
+
+            // Retrieve the state object and the handler socket  
+            // from the asynchronous state object.  
+            StateObject state = (StateObject)ar.AsyncState;
+            Socket handler = state.workSocket;
+
+            // Read data from the client socket.
+            int bytesRead = handler.EndReceive(ar);
+
+            if (bytesRead > 0)
+            {
+                // There  might be more data, so store the data received so far.  
+                state.sb.Append(Encoding.ASCII.GetString(
+                    state.buffer, 0, bytesRead));
+
+                // Check for end-of-file tag. If it is not there, read
+                // more data.  
+                content = state.sb.ToString();
+                //if (content.IndexOf("<EOF>") > -1)
+                //{
+                    // All the data has been read from the
+                    // client. Display it on the console.  
+                    //Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
                     Subscriber sub;
                     BaseStation bs;
-                    switch (mail[0])
+                    switch (content[0])
                     {
                         case '0':
-                            bs = BaseStation.Deserialize(mail.Substring(1));
+                            bs = BaseStation.Deserialize(content.Substring(1));
                             Client.client = new TcpClient(bs.ip, Int32.Parse(bs.port));
                             Client.stream = Client.client.GetStream();
                             break;
                         case '1':
-                            switch (mail[1])
+                            switch (content[1])
                             {
                                 case '1':
-                                    bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bs = BaseStation.Deserialize(content.Substring(2));
                                     bsChange.OnNext(new BaseStationChange() { AddRemove = "+", NewBS = bs });
                                     break;
                                 case '2':
-                                    bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bs = BaseStation.Deserialize(content.Substring(2));
                                     bsChange.OnNext(new BaseStationChange() { AddRemove = "-", NewBS = bs });
                                     break;
                                 case '3':
-                                    bs = BaseStation.Deserialize(mail.Substring(2));
+                                    bs = BaseStation.Deserialize(content.Substring(2));
                                     bsChange.OnNext(new BaseStationChange() { AddRemove = "+-", NewBS = bs });
                                     break;
                             }
                             break;
                         case '2':
-                            switch (mail[1])
+                            switch (content[1])
                             {
                                 case '1':
-                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    sub = Subscriber.Deserialize(content.Substring(2));
                                     sub.ParseClassmark();
                                     subChange.OnNext(new SubscribersChange() { AddRemove = "+", NewSub = sub });
                                     break;
                                 case '2':
-                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    sub = Subscriber.Deserialize(content.Substring(2));
                                     subChange.OnNext(new SubscribersChange() { AddRemove = "-", NewSub = sub });
                                     break;
                             }
-                            break;                            
+                            break;
                         case '3':
-                            switch (mail[1])
+                            switch (content[1])
                             {
                                 case '1':
-                                    TA ta = TA.Deserialize(mail.Substring(2));
+                                    TA ta = TA.Deserialize(content.Substring(2));
                                     taChange.OnNext(new TAChange() { NewTA = ta });
                                     break;
                                 case '2':
-                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    sub = Subscriber.Deserialize(content.Substring(2));
                                     geoChange.OnNext(new GeolocationChange() { NewGeo = SplitAssist.GetGeolocation(sub) });
                                     break;
                                 case '3':
-                                    sub = Subscriber.Deserialize(mail.Substring(2));
+                                    sub = Subscriber.Deserialize(content.Substring(2));
                                     string res;
                                     using (var client = new WebClient())
                                     {
                                         res = client.DownloadString(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?query=decode&apdu=" + sub.assistData);
                                         //res = client.DownloadString(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?query=apdu&apdu=" + sub.assistData);
                                     }
-                                    logChange.OnNext(new LogChange() { NewLog = new LogUnit(String.Format(
-                                        "Получены измерения местоположения для абонента: IMSI = {0}, IMEI-SV = {1} - {2}", sub.imsi, sub.imeiSV, res)) });
+                                    logChange.OnNext(new LogChange()
+                                    {
+                                        NewLog = new LogUnit(String.Format(
+                                        "Получены измерения местоположения для абонента: IMSI = {0}, IMEI-SV = {1} - {2}", sub.imsi, sub.imeiSV, res))
+                                    });
                                     break;
-                            }                            
+                            }
                             break;
                         case '4':
-                            bs = BaseStation.Deserialize(mail.Substring(1));
+                            bs = BaseStation.Deserialize(content.Substring(1));
                             bsChange.OnNext(new BaseStationChange() { AddRemove = "-all", NewBS = bs });
                             break;
                         case '9':
-                            switch (mail[1])
+                            switch (content[1])
                             {
                                 case '0':
                                     break;
@@ -526,18 +608,56 @@ namespace client
                             }
                             break;
                     }
-                    stm.Write(readBuf, 0, 1024);
-                    stm.Close();
-                    tc.Close();
-                    isStarted = false;
-                }
+                    // Echo the data back to the client.  
+                    Send(handler, content);
+                //}
+                //else
+                //{
+                //    // Not all data received. Get more.  
+                //    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                //    new AsyncCallback(ReadCallback), state);
+                //}
+            }
+        }
+
+        private static void Send(Socket handler, String data)
+        {
+            // Convert the string data to byte data using ASCII encoding.  
+            byte[] byteData = Encoding.ASCII.GetBytes(data);
+
+            // Begin sending the data to the remote device.  
+            handler.BeginSend(byteData, 0, byteData.Length, 0,
+                new AsyncCallback(SendCallback), handler);
+        }
+
+        private static void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                // Retrieve the socket from the state object.  
+                Socket handler = (Socket)ar.AsyncState;
+
+                // Complete sending the data to the remote device.  
+                int bytesSent = handler.EndSend(ar);
+                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+
+                handler.Shutdown(SocketShutdown.Both);
+                handler.Close();
+
             }
             catch (Exception e)
             {
                 logChange.OnNext(new LogChange() { NewLog = new LogUnit(e.Message) });
             }
         }
+
+        public static void StopListening()
+        {
+            listening = false;
+            allDone.Set();
+        }
     }
+    
     public class QueryParameters
     {
         public string responseTime; 
@@ -626,16 +746,10 @@ namespace client
                 lvTA.ItemsSource = tas;
                 lvCellID.ItemsSource = cellids;
                 lvLog.ItemsSource = log;
-                cbMapSubs.ItemsSource = subs;                
-                serverThread = new Thread(new ThreadStart(Server.Start));
+                cbMapSubs.ItemsSource = subs;
+                serverThread = new Thread(new ThreadStart(AsynchronousSocketListener.StartListening));
                 serverThread.Start();
-                //Client.client = new TcpClient("localhost", 8080);
-                //Client.stream = Client.client.GetStream();
-                //Client.SendMessage("18081");
-                //if (Client.GetMessage() == "0")
-                //{
-                //    Logging("Подключено к серверу");
-                //}
+
                 //assistInformation = SplitAssist.Split(ParseAssist(GetAssistFromInet())); // только с подключением к rrlp-серверу
                 //assistThread = new Thread(new ThreadStart(RenewAssistDataPeriodically));
                 //assistThread.Start();
@@ -1138,7 +1252,7 @@ namespace client
         }
         private void FormClosing(object sender, CancelEventArgs e)
         {
-            Server.listener.Stop();
+            AsynchronousSocketListener.StopListening();
             Application.Current.Shutdown();
         }
     }    
