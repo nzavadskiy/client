@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 
 namespace client
 {
@@ -24,7 +25,7 @@ namespace client
         public LogUnit(string fact, BaseStation bs)
         {
             this.time = DateTime.Now.ToLongTimeString();
-            this.fact = String.Format("{0} базовая станция:Имя = {1}, MCC = {2}, MNC = {3}, CellID = {4}, LAC = {5}",
+            this.fact = String.Format("{0} базовая станция: Имя = {1}, MCC = {2}, MNC = {3}, CellID = {4}, LAC = {5}",
                 fact, bs.name, bs.mcc, bs.mnc, bs.cellid, bs.lac);
         }
         public LogUnit(string fact, Subscriber sub)
@@ -46,6 +47,20 @@ namespace client
         {
             this.time = DateTime.Now.ToLongTimeString();
             this.fact = String.Format("Добавлено данные о местоположении с использованием Cell ID: IMSI = {0}, IMEI-SV = {1}", _cellid.imsi, _cellid.imeiSV);
+        }
+    }
+
+    public partial class MainWindow : Window
+    {
+        public void Logging(string fact)
+        {
+            tbStatus.Text = fact;
+            log.Add(new LogUnit(fact));
+        }
+        private void Logging(string factToStatus, string factToLog)
+        {
+            tbStatus.Text = factToStatus;
+            log.Add(new LogUnit(factToLog));
         }
     }
 }

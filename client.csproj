@@ -76,9 +76,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CollectionChangedFunctions.cs" />
     <Compile Include="EntitiesChange.cs" />
     <Compile Include="Entities.cs" />
+    <Compile Include="FilteringFunctions.cs" />
+    <Compile Include="GetGeoFunctions.cs" />
+    <Compile Include="GetGeoPeriodicallyFunctions.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="RenewAssistDataFunctions.cs" />
     <Compile Include="SetQueryParameters.xaml.cs">
       <DependentUpon>SetQueryParameters.xaml</DependentUpon>
     </Compile>
@@ -87,6 +92,7 @@
     </Compile>
     <Compile Include="SocketListener.cs" />
     <Compile Include="SplitAssistData.cs" />
+    <Compile Include="VariablesMainWindowClass.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
