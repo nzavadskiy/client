@@ -8,9 +8,6 @@ using System.Windows.Data;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.IO;
 using System.Reactive.Linq;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
@@ -19,7 +16,6 @@ using System.Timers;
 using Microsoft.Maps.MapControl.WPF;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using Newtonsoft.Json;
 
 namespace client
 {    

@@ -6,33 +6,159 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace client
 {
     [DataContract]
-    public class BaseStation
+    public class BaseStation : INotifyPropertyChanged
     {
+        public string _name;
+        public string _mcc;
+        public string _mnc;
+        public string _cellid;
+        public string _lac;
+        public string _lat;
+        public string _lon;
+        public string _antenna;
+        public string _ip;
+        public string _port;
+        public event PropertyChangedEventHandler PropertyChanged;    
+        public void OnPropertyChanged(string prop = "")
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
         [DataMember]
-        public string name { get; set; }
+        public string name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged("name");
+                }
+            }
+        }
         [DataMember]
-        public string mcc { get; set; }
+        public string mcc
+        {
+            get { return _mcc; }
+            set
+            {
+                if (_mcc != value)
+                {
+                    _mcc = value;
+                    OnPropertyChanged("mcc");
+                }
+            }
+        }
         [DataMember]
-        public string mnc { get; set; }
+        public string mnc
+        {
+            get { return _mnc; }
+            set
+            {
+                if (_mnc != value)
+                {
+                    _mnc = value;
+                    OnPropertyChanged("mnc");
+                }
+            }
+        }
         [DataMember]
-        public string cellid { get; set; }
+        public string cellid
+        {
+            get { return _cellid; }
+            set
+            {
+                if (_cellid != value)
+                {
+                    _cellid = value;
+                    OnPropertyChanged("cellid");
+                }
+            }
+        }
         [DataMember]
-        public string lac { get; set; }
+        public string lac
+        {
+            get { return _lac; }
+            set
+            {
+                if (_lac != value)
+                {
+                    _lac = value;
+                    OnPropertyChanged("lac");
+                }
+            }
+        }
         [DataMember]
-        public string lat { get; set; }
+        public string lat
+        {
+            get { return _lat; }
+            set
+            {
+                if (_lat != value)
+                {
+                    _lat = value;
+                    OnPropertyChanged("lat");
+                }
+            }
+        }
         [DataMember]
-        public string lon { get; set; }
+        public string lon
+        {
+            get { return _lon; }
+            set
+            {
+                if (_lon != value)
+                {
+                    _lon = value;
+                    OnPropertyChanged("lon");
+                }
+            }
+        }
         [DataMember]
-        public string antenna { get; set; }
+        public string antenna
+        {
+            get { return _antenna; }
+            set
+            {
+                if (_antenna != value)
+                {
+                    _antenna = value;
+                    OnPropertyChanged("antenna");
+                }
+            }
+        }
         [DataMember]
-        public string ip { get; set; }
+        public string ip
+        {
+            get { return _ip; }
+            set
+            {
+                if (_ip != value)
+                {
+                    _ip = value;
+                    OnPropertyChanged("ip");
+                }
+            }
+        }
         [DataMember]
-        public string port { get; set; }
-
+        public string port
+        {
+            get { return _port; }
+            set
+            {
+                if (_port != value)
+                {
+                    _port = value;
+                    OnPropertyChanged("port");
+                }
+            }
+        }
         public BaseStation() { }
         public BaseStation(string name, string mcc, string mnc, string cellid, string lac, string lat, string lon, string antenna, string ip, string port)
         {
@@ -91,7 +217,6 @@ namespace client
                 }
             }
         }
-
         public override int GetHashCode()
         {
             return 363513814 + EqualityComparer<string>.Default.GetHashCode(name);

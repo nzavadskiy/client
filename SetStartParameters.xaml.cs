@@ -20,10 +20,6 @@ namespace client
 {
     public partial class SetStartParameters : Window
     {
-        string localIP;
-        string localPort;
-        string RenewAssistInterval;
-
         public SetStartParameters()
         {
             InitializeComponent();
