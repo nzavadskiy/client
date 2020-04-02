@@ -79,12 +79,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EntitiesChange.cs" />
+    <Compile Include="Entitys.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="SetQueryParameters.xaml.cs">
       <DependentUpon>SetQueryParameters.xaml</DependentUpon>
     </Compile>
     <Compile Include="SetStartParameters.xaml.cs">
       <DependentUpon>SetStartParameters.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SocketListener.cs" />
     <Compile Include="SplitAssistData.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
