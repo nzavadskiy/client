@@ -80,6 +80,10 @@ namespace client
     }
     public partial class MainWindow : Window
     {
+        public static IPAddress localIP;
+        public static int localPort;
+        public static int renewAssistInterval;
+
         public static int latencyTime = 1;
         public static Thread serverThread;
         public static Thread assistThread;

@@ -20,6 +20,10 @@ namespace client
 {
     public partial class SetStartParameters : Window
     {
+        string localIP;
+        string localPort;
+        string RenewAssistInterval;
+
         public SetStartParameters()
         {
             InitializeComponent();
@@ -27,6 +31,21 @@ namespace client
         private void BtnOK_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mainwindow = new MainWindow();
+            if (!System.Net.IPAddress.TryParse(tbLocalIP.Text, out MainWindow.localIP))
+            {
+                MessageBox.Show("Неверный формат IP адреса");
+                return;
+            }
+            if (!int.TryParse(tbLocalPort.Text, out MainWindow.localPort))
+            {
+                MessageBox.Show("Неверный формат номера порта");
+                return;
+            }
+            if (!int.TryParse(tbRenewAssistInterval.Text, out MainWindow.renewAssistInterval))
+            {
+                MessageBox.Show("Неверный формат интервала");
+                return;
+            }
             mainwindow.Show();
             MainWindow.isWindowActive = true;
             Hide();

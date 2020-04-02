@@ -34,9 +34,7 @@ namespace client
         // Thread signal.  
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
-        public AsynchronousSocketListener()
-        {
-        }
+        public AsynchronousSocketListener(){}
 
         public static void StartListening()
         {
@@ -62,11 +60,11 @@ namespace client
             // running the listener is "host.contoso.com".  
             //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             //IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8081);
+            //IPAddress ipAddress = IPAddress.Parse(MainWindow.localIP);
+            IPEndPoint localEndPoint = new IPEndPoint(MainWindow.localIP, MainWindow.localPort);
 
             // Create a TCP/IP socket.  
-            Socket listener = new Socket(ipAddress.AddressFamily,
+            Socket listener = new Socket(MainWindow.localIP.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
 
             // Bind the socket to the local endpoint and listen for incoming connections.  
