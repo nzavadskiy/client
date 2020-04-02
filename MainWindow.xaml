@@ -40,107 +40,208 @@
         </ListBox>
         <TabControl Name="tcInfo" Grid.Row="1" Grid.Column="0">
             <TabItem Header="Базовые станции">
-                <ListView Name="lvBaseStations" x:FieldModifier="public">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=name}">Имя</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=mcc}">MCC</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=mnc}">MNC</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lac}">LAC</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=cellid}">Cell ID</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=antenna}">Антенна</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <ComboBox Name="cbFilterFieldsBS" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
+                        <ComboBoxItem>Имя</ComboBoxItem>
+                        <ComboBoxItem>MCC</ComboBoxItem>
+                        <ComboBoxItem>MNC</ComboBoxItem>
+                        <ComboBoxItem>LAC</ComboBoxItem>
+                        <ComboBoxItem>Cell ID</ComboBoxItem>
+                        <ComboBoxItem>Антенна</ComboBoxItem>
+                        <ComboBoxItem>Широта</ComboBoxItem>
+                        <ComboBoxItem>Долгота</ComboBoxItem>
+                    </ComboBox>
+                    <TextBox Name="tbSortFieldBS" TextChanged="tbSortFieldBS_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
+                    <ListView Name="lvBaseStations" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">                    
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=name}">Имя</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=mcc}">MCC</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=mnc}">MNC</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lac}">LAC</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=cellid}">Cell ID</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=antenna}">Антенна</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
             </TabItem>
             <TabItem Header="Абоненты">
-                <ListView Name="lvSubscribers" x:FieldModifier="public">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}"  Width="Auto">IMSI</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}"  Width="Auto">IMEI-SV</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=subName}"  Width="Auto">Имя</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=assistData}"  Width="Auto">Доступные методы</GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                    <ListView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding Name}"/>
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </ListView.GroupStyle>
-                    <ListView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Получить данные о местоположении">
-                                <MenuItem Header="MS-Based GPS" Click="MiGetMsbGPS"></MenuItem>
-                                <MenuItem Header="MS-Assisted GPS" Click="MiGetMsaGPS"></MenuItem>
-                                <MenuItem Header="MS-Based E-OTD" Click="MiGetMsbEOTD"></MenuItem>
-                                <MenuItem Header="MS-Assisted E-OTD" Click="MiGetMsaEOTD"></MenuItem>
-                                <MenuItem Header="По параметру TA" Click="MiGetTA"></MenuItem>
-                                <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellID"></MenuItem>
-                            </MenuItem>
-                            <MenuItem Header="Получать местоположение периодически">
-                                <MenuItem Header="MS-Based GPS" Click="MiGetPerMsbGPS"></MenuItem>
-                                <MenuItem Header="MS-Assisted GPS" Click="MiGetPerMsaGPS"></MenuItem>
-                                <MenuItem Header="MS-Based E-OTD" Click="MiGetPerMsbEOTD"></MenuItem>
-                                <MenuItem Header="MS-Assisted E-OTD" Click="MiGetPerMsaEOTD"></MenuItem>
-                                <MenuItem Header="По параметру TA" Click="MiGetPerTA"></MenuItem>
-                                <MenuItem Header="Расстояние до базовой станции" Click="MiGetPerCellID"></MenuItem>
-                            </MenuItem>
-                            <MenuItem Header="Остановить процедуру периодического получения местоположения" Click="MiStopGeoPeriod_Click"></MenuItem>
-                        </ContextMenu>
-                    </ListView.ContextMenu>
-                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <ComboBox Name="cbFilterFieldsSub" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
+                        <ComboBoxItem>IMSI</ComboBoxItem>
+                        <ComboBoxItem>IMEI-SV</ComboBoxItem>
+                        <ComboBoxItem>Имя абонента</ComboBoxItem>
+                        <ComboBoxItem>Имя БС</ComboBoxItem>
+                        <ComboBoxItem>Методы геолокации</ComboBoxItem>
+                    </ComboBox>
+                    <TextBox Name="tbSortFieldSub" TextChanged="tbSortFieldSub_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
+                    <ListView Name="lvSubscribers" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}"  Width="Auto">IMSI</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}"  Width="Auto">IMEI-SV</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=subName}"  Width="Auto">Имя</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=assistData}"  Width="Auto">Доступные методы</GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ListView.GroupStyle>
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Получить данные о местоположении">
+                                    <MenuItem Header="MS-Based GPS" Click="MiGetMsbGPS"></MenuItem>
+                                    <MenuItem Header="MS-Assisted GPS" Click="MiGetMsaGPS"></MenuItem>
+                                    <MenuItem Header="MS-Based E-OTD" Click="MiGetMsbEOTD"></MenuItem>
+                                    <MenuItem Header="MS-Assisted E-OTD" Click="MiGetMsaEOTD"></MenuItem>
+                                    <MenuItem Header="По параметру TA" Click="MiGetTA"></MenuItem>
+                                    <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellID"></MenuItem>
+                                </MenuItem>
+                                <MenuItem Header="Получать местоположение периодически">
+                                    <MenuItem Header="MS-Based GPS" Click="MiGetPerMsbGPS"></MenuItem>
+                                    <MenuItem Header="MS-Assisted GPS" Click="MiGetPerMsaGPS"></MenuItem>
+                                    <MenuItem Header="MS-Based E-OTD" Click="MiGetPerMsbEOTD"></MenuItem>
+                                    <MenuItem Header="MS-Assisted E-OTD" Click="MiGetPerMsaEOTD"></MenuItem>
+                                    <MenuItem Header="По параметру TA" Click="MiGetPerTA"></MenuItem>
+                                    <MenuItem Header="Расстояние до базовой станции" Click="MiGetPerCellID"></MenuItem>
+                                </MenuItem>
+                                <MenuItem Header="Остановить процедуру периодического получения местоположения" Click="MiStopGeoPeriod_Click"></MenuItem>
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                    </ListView>
+                </Grid>
             </TabItem>
             <TabItem Header="Данные о местоположении">
-                <ListView Name="lvGeolocation" x:FieldModifier="public">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=latitude}">Широта</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=longtitude}">Долгота</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=date}">Дата</GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <ComboBox Name="cbFilterFieldsGeo" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
+                        <ComboBoxItem>IMSI</ComboBoxItem>
+                        <ComboBoxItem>IMEI-SV</ComboBoxItem>
+                        <ComboBoxItem>Широта</ComboBoxItem>
+                        <ComboBoxItem>Долгота</ComboBoxItem>
+                        <ComboBoxItem>Дата</ComboBoxItem>
+                    </ComboBox>
+                    <TextBox Name="tbSortFieldGeo" TextChanged="tbSortFieldGeo_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
+                    <ListView Name="lvGeolocation" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=latitude}">Широта</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=longtitude}">Долгота</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=date}">Дата</GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
             </TabItem>
             <TabItem Header="TA">
-                <ListView Name="lvTA" x:FieldModifier="public">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=ta}">TA</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev1}">lev1</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev2}">lev2</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev3}">lev3</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev4}">lev4</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev5}">lev5</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev6}">lev6</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lev7}">lev7</GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <ComboBox Name="cbFilterFieldsTA" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
+                        <ComboBoxItem>IMSI</ComboBoxItem>
+                        <ComboBoxItem>IMEI-SV</ComboBoxItem>
+                    </ComboBox>
+                    <TextBox Name="tbSortFieldTA" TextChanged="tbSortFieldTA_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
+                    <ListView Name="lvTA" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=ta}">TA</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev1}">lev1</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev2}">lev2</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev3}">lev3</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev4}">lev4</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev5}">lev5</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev6}">lev6</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev7}">lev7</GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
             </TabItem>
             <TabItem Header="Cell ID">
-                <ListView Name="lvCellID" x:FieldModifier="public">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=bsName}">Имя БС</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=dist}">Расстояние</GridViewColumn>
-                         </GridView>
-                    </ListView.View>
-                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <ComboBox Name="cbFilterFieldsCellID" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
+                        <ComboBoxItem>IMSI</ComboBoxItem>
+                        <ComboBoxItem>IMEI-SV</ComboBoxItem>
+                        <ComboBoxItem>Имя БС</ComboBoxItem>
+                        <ComboBoxItem>Широта</ComboBoxItem>
+                        <ComboBoxItem>Долгота</ComboBoxItem>
+                        <ComboBoxItem>Расстояние</ComboBoxItem>
+                    </ComboBox>
+                    <TextBox Name="tbSortFieldCellID" TextChanged="tbSortFieldCellID_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
+                    <ListView Name="lvCellID" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=bsName}">Имя БС</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=dist}">Расстояние</GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
             </TabItem>
             <TabItem Header="Карта">
                 <Grid>
