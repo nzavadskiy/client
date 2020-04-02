@@ -518,15 +518,9 @@ namespace client
                 // There  might be more data, so store the data received so far.  
                 state.sb.Append(Encoding.ASCII.GetString(
                     state.buffer, 0, bytesRead));
-
-                // Check for end-of-file tag. If it is not there, read
-                // more data.  
-                content = state.sb.ToString();
-                //if (content.IndexOf("<EOF>") > -1)
-                //{
-                    // All the data has been read from the
-                    // client. Display it on the console.  
-                    //Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
+                try
+                {
+                    content = state.sb.ToString();
                     Subscriber sub;
                     BaseStation bs;
                     switch (content[0])
@@ -592,6 +586,10 @@ namespace client
                                         "Получены измерения местоположения для абонента: IMSI = {0}, IMEI-SV = {1} - {2}", sub.imsi, sub.imeiSV, res))
                                     });
                                     break;
+                                case '4':
+                                    CellID cellid = CellID.Deserialize(content.Substring(2));
+                                    cellidChange.OnNext(new CellIDChange() { NewCellID = cellid });
+                                    break;
                             }
                             break;
                         case '4':
@@ -608,15 +606,13 @@ namespace client
                             }
                             break;
                     }
-                    // Echo the data back to the client.  
-                    Send(handler, content);
-                //}
-                //else
-                //{
-                //    // Not all data received. Get more.  
-                //    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                //    new AsyncCallback(ReadCallback), state);
-                //}
+                }
+                catch (Exception e)
+                {
+                    logChange.OnNext(new LogChange() { NewLog = new LogUnit(e.Message) });
+                    Send(handler, "91");
+                }
+                Send(handler, "90");
             }
         }
 
@@ -930,7 +926,8 @@ namespace client
             Subscriber sub = new Subscriber();
             sub = (Subscriber)lvSubscribers.SelectedItem;
             sub.assistData = assist;
-            Client.SendMessage(num.ToString() + sub.Serialize());
+            string msg = sub.Serialize();
+            Client.SendMessage(num.ToString() + msg);
             string res = Client.GetMessage();
             if (res == "90")
                 Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
@@ -969,10 +966,10 @@ namespace client
         private void MiGetTA(object sender, RoutedEventArgs e)
         {
             GetGeolocation(2, "");
-        }
+        }   
         private void MiGetCellID(object sender, RoutedEventArgs e)
         {
-            GetGeolocation(6, "");
+            GetGeolocation(3, "");
         }
         private void MiGetMsbGPSAll(object sender, RoutedEventArgs e)
         {
@@ -1240,7 +1237,17 @@ namespace client
         {
             App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
-                cellids.Add(CellIDs.NewCellID);
+                CellID cellid = CellIDs.NewCellID;
+                foreach(Subscriber sub in subs.Where(s => s.imsi == cellid.imsi && s.imeiSV == cellid.imeiSV))
+                {
+                    cellid.bsName = sub.bsName;
+                    foreach(BaseStation bs in bss.Where(b => b.name == sub.bsName))
+                    {
+                        cellid.lat = bs.lat;
+                        cellid.lon = bs.lon;
+                    }
+                }
+                cellids.Add(cellid);
             });
         }
         public static void AddNewLog(LogChange Log)
