@@ -188,6 +188,9 @@
                     <ComboBox Name="cbFilterFieldsTA" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
                         <ComboBoxItem>IMSI</ComboBoxItem>
                         <ComboBoxItem>IMEI-SV</ComboBoxItem>
+                        <ComboBoxItem>Широта</ComboBoxItem>
+                        <ComboBoxItem>Долгота</ComboBoxItem>
+                        <ComboBoxItem>Дата</ComboBoxItem>
                     </ComboBox>
                     <TextBox Name="tbSortFieldTA" TextChanged="tbSortFieldTA_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
                     <ListView Name="lvTA" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">
@@ -195,14 +198,9 @@
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=imsi}">IMSI</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=imeiSV}">IMEI-SV</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=ta}">TA</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev1}">lev1</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev2}">lev2</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev3}">lev3</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev4}">lev4</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev5}">lev5</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev6}">lev6</GridViewColumn>
-                                <GridViewColumn DisplayMemberBinding="{Binding Path=lev7}">lev7</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=date}">Дата</GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>

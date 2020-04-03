@@ -87,6 +87,12 @@ namespace client
                         return ((item as TA).imsi.IndexOf(tbSortFieldTA.Text, StringComparison.OrdinalIgnoreCase) >= 0);
                     case 1: //imeisv
                         return ((item as TA).imeiSV.IndexOf(tbSortFieldTA.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                    case 2: //lata
+                        return ((item as TA).lat.IndexOf(tbSortFieldTA.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                    case 3: //lon
+                        return ((item as TA).lon.IndexOf(tbSortFieldTA.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                    case 4: //date
+                        return ((item as TA).date.IndexOf(tbSortFieldTA.Text, StringComparison.OrdinalIgnoreCase) >= 0);
                     default:
                         return false;
                 }

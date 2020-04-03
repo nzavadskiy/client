@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Newtonsoft.Json;
 
 namespace client
 {
@@ -179,7 +180,33 @@ namespace client
                             switch (content[1])
                             {
                                 case '1':
-                                    TA ta = TA.Deserialize(content.Substring(2));
+                                    TA ta = new TA();
+                                    dynamic bsLevRes = JsonConvert.DeserializeObject(content.Substring(2));
+                                    if(bsLevRes.ContainsKey("imsi"))
+                                    {
+                                        ta.imsi = bsLevRes.imsi;
+                                    }
+                                    if (bsLevRes.ContainsKey("imeiSV"))
+                                    {
+                                        ta.imeiSV = bsLevRes.imeiSV;
+                                    }
+                                    if (bsLevRes.ContainsKey("servingBSName"))
+                                    {
+                                        ta.servingBSName = bsLevRes.servingBSName;
+                                    }
+                                    if (bsLevRes.ContainsKey("servingBSTA"))
+                                    {
+                                        ta.servingBSTA = bsLevRes.servingBSTA;
+                                    }
+                                    if (bsLevRes.ContainsKey("servingBSLev"))
+                                    {
+                                        ta.servingBSLev = bsLevRes.servingBSLev;
+                                    }
+                                    if (bsLevRes.ContainsKey("neighbours"))
+                                    {
+                                        ta.GetFieldsFromTAMsg(bsLevRes.neighbours);
+                                    }
+                                    // calc geolocation
                                     taChange.OnNext(new TAChange() { NewTA = ta });
                                     break;
                                 case '2':

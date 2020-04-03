@@ -217,6 +217,19 @@ namespace client
                 }
             }
         }
+        public void GetFieldsFromTAMsg(dynamic neighbourBS)
+        {
+            if (neighbourBS.ContainsKey("mcc"))
+                mcc = neighbourBS.mcc;
+            if (neighbourBS.ContainsKey("mnc"))
+                mnc = neighbourBS.mnc;
+            if (neighbourBS.ContainsKey("lac"))
+                lac = neighbourBS.lac;
+            if (neighbourBS.ContainsKey("cellid"))
+                cellid = neighbourBS.cellid;
+            if (neighbourBS.ContainsKey("antenna"))
+                antenna = neighbourBS.antenna;
+        }
         public override int GetHashCode()
         {
             return 363513814 + EqualityComparer<string>.Default.GetHashCode(name);
@@ -338,21 +351,36 @@ namespace client
         [DataMember]
         public string imeiSV { get; set; }
         [DataMember]
-        public string ta { get; set; }
+        public string lat { get; set; }
         [DataMember]
-        public string lev1 { get; set; }
+        public string lon { get; set; }
         [DataMember]
-        public string lev2 { get; set; }
+        public string date { get; set; }
         [DataMember]
-        public string lev3 { get; set; }
+        public string servingBSName { get; set; }
         [DataMember]
-        public string lev4 { get; set; }
+        public string servingBSTA { get; set; }
         [DataMember]
-        public string lev5 { get; set; }
+        public string servingBSLev { get; set; }
         [DataMember]
-        public string lev6 { get; set; }
+        public const int neighboursCount = 6;
         [DataMember]
-        public string lev7 { get; set; }
+        public BaseStation[] neighbours;
+        public TA()
+        {
+            neighbours = new BaseStation[neighboursCount];
+            for(int i = 0; i < neighboursCount; i++)
+            {
+                neighbours[i] = new BaseStation();
+            }
+        }
+        public void GetFieldsFromTAMsg(dynamic neighbours)
+        {
+            for (int i = 0; i < neighboursCount; i++)
+            {
+                this.neighbours[i].GetFieldsFromTAMsg(neighbours[i]);
+            }
+        }
         public string Serialize()
         {
             DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(TA));
