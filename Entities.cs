@@ -21,6 +21,8 @@ namespace client
         public string _lac;
         public string _lat;
         public string _lon;
+        public string _alt;
+        public string _accuracy;
         public string _antenna;
         public string _ip;
         public string _port;
@@ -118,6 +120,32 @@ namespace client
                 {
                     _lon = value;
                     OnPropertyChanged("lon");
+                }
+            }
+        }
+        [DataMember]
+        public string alt
+        {
+            get { return _alt; }
+            set
+            {
+                if (_alt != value)
+                {
+                    _alt = value;
+                    OnPropertyChanged("alt");
+                }
+            }
+        }
+        [DataMember]
+        public string accuracy
+        {
+            get { return _accuracy; }
+            set
+            {
+                if (_accuracy != value)
+                {
+                    _accuracy = value;
+                    OnPropertyChanged("accuracy");
                 }
             }
         }

@@ -30,6 +30,10 @@ namespace client
                         return ((item as BaseStation).lat.IndexOf(tbSortFieldBS.Text, StringComparison.OrdinalIgnoreCase) >= 0);
                     case 7: //lon
                         return ((item as BaseStation).lon.IndexOf(tbSortFieldBS.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                    case 8: //alt
+                        return ((item as BaseStation).alt.IndexOf(tbSortFieldBS.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                    case 9: //accuracy
+                        return ((item as BaseStation).accuracy.IndexOf(tbSortFieldBS.Text, StringComparison.OrdinalIgnoreCase) >= 0);
                     default:
                         return false;
                 }

@@ -64,50 +64,60 @@ namespace client
         {
             try
             {
-                System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvBaseStations.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
-                System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvGeolocation.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
-                System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvSubscribers.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
-                qParams = new QueryParameters("7", "7", "15", "55", "37", "0", "24", "0.1");
-                bss = new ObservableCollection<BaseStation>();
-                subs = new ObservableCollection<Subscriber>();
-                geos = new ObservableCollection<Geolocation>();
-                tas = new ObservableCollection<TA>();
-                cellids = new ObservableCollection<CellID>();
-                log = new ObservableCollection<LogUnit>();
-                clients = new List<Client>();
-                bss.CollectionChanged += BS_CollectionChanged;
-                subs.CollectionChanged += Subs_CollectionChanged;
-                geos.CollectionChanged += Geos_CollectionChanged;
-                tas.CollectionChanged += TAs_CollectionChanged;
-                cellids.CollectionChanged += CellIDs_CollectionChanged;
-                log.CollectionChanged += Log_CollectionChanged;
-                
-                lvBaseStations.ItemsSource = bss;
-                lvSubscribers.ItemsSource = subs;
-                lvGeolocation.ItemsSource = geos;
-                lvTA.ItemsSource = tas;
-                lvCellID.ItemsSource = cellids;
-                lvLog.ItemsSource = log;
-                cbMapSubs.ItemsSource = subs;
+                if (!isServerStarted)
+                {
+                    System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvBaseStations.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
+                    System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvGeolocation.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
+                    System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvSubscribers.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
+                    qParams = new QueryParameters("7", "7", "15", "55", "37", "0", "24", "0.1");
+                    bss = new ObservableCollection<BaseStation>();
+                    subs = new ObservableCollection<Subscriber>();
+                    geos = new ObservableCollection<Geolocation>();
+                    tas = new ObservableCollection<TA>();
+                    cellids = new ObservableCollection<CellID>();
+                    log = new ObservableCollection<LogUnit>();
+                    clients = new List<Client>();
+                    bss.CollectionChanged += BS_CollectionChanged;
+                    subs.CollectionChanged += Subs_CollectionChanged;
+                    geos.CollectionChanged += Geos_CollectionChanged;
+                    tas.CollectionChanged += TAs_CollectionChanged;
+                    cellids.CollectionChanged += CellIDs_CollectionChanged;
+                    log.CollectionChanged += Log_CollectionChanged;
 
-                bsView = (CollectionView)CollectionViewSource.GetDefaultView(lvBaseStations.ItemsSource);
-                bsView.Filter = BSFilter;
-                subView = (CollectionView)CollectionViewSource.GetDefaultView(lvSubscribers.ItemsSource);
-                subView.GroupDescriptions.Add(new PropertyGroupDescription("bsName"));
-                subView.Filter = SubFilter;
-                geoView = (CollectionView)CollectionViewSource.GetDefaultView(lvGeolocation.ItemsSource);
-                geoView.Filter = GeoFilter;
-                taView = (CollectionView)CollectionViewSource.GetDefaultView(lvTA.ItemsSource);
-                taView.Filter = TAFilter;
-                cellIDView = (CollectionView)CollectionViewSource.GetDefaultView(lvCellID.ItemsSource);
-                cellIDView.Filter = CellIDFilter;
+                    lvBaseStations.ItemsSource = bss;
+                    lvSubscribers.ItemsSource = subs;
+                    lvGeolocation.ItemsSource = geos;
+                    lvTA.ItemsSource = tas;
+                    lvCellID.ItemsSource = cellids;
+                    lvLog.ItemsSource = log;
+                    cbMapSubs.ItemsSource = subs;
 
-                serverThread = new Thread(new ThreadStart(AsynchronousSocketListener.StartListening));
-                serverThread.Start();
+                    bsView = (CollectionView)CollectionViewSource.GetDefaultView(lvBaseStations.ItemsSource);
+                    bsView.Filter = BSFilter;
+                    subView = (CollectionView)CollectionViewSource.GetDefaultView(lvSubscribers.ItemsSource);
+                    subView.GroupDescriptions.Add(new PropertyGroupDescription("bsName"));
+                    subView.Filter = SubFilter;
+                    geoView = (CollectionView)CollectionViewSource.GetDefaultView(lvGeolocation.ItemsSource);
+                    geoView.Filter = GeoFilter;
+                    taView = (CollectionView)CollectionViewSource.GetDefaultView(lvTA.ItemsSource);
+                    taView.Filter = TAFilter;
+                    cellIDView = (CollectionView)CollectionViewSource.GetDefaultView(lvCellID.ItemsSource);
+                    cellIDView.Filter = CellIDFilter;
 
-                //assistInformation = SplitAssist.Split(ParseAssist(GetAssistFromInet())); // только с подключением к rrlp-серверу
-                //assistThread = new Thread(new ThreadStart(RenewAssistDataPeriodically));
-                //assistThread.Start();
+                    serverThread = new Thread(new ThreadStart(AsynchronousSocketListener.StartListening));
+                    serverThread.Start();
+                    isServerStarted = true;
+
+                    //assistInformation = SplitAssist.Split(ParseAssist(GetAssistFromInet())); // только с подключением к rrlp-серверу
+                    //assistThread = new Thread(new ThreadStart(RenewAssistDataPeriodically));
+                    //assistThread.Start();
+
+                    Logging("Клиент запущен");
+                }
+                else
+                {
+                    Logging("Клиент уже запущен");
+                }
             }
             catch (Exception e1)
             {
@@ -340,12 +350,27 @@ namespace client
                 log.Add(Log.NewLog);
             });
         }
+        private void MenuStopTestClient_Click(object sender, RoutedEventArgs e)
+        {
+            if (isServerStarted)
+            {
+                SendMsgToAllBS("0");
+                CloseAllClients();
+                AsynchronousSocketListener.StopListening();
+            }
+            isServerStarted = false;
+            Logging("Клиент остановлен");
+        }
         private void FormClosing(object sender, CancelEventArgs e)
         {
-            SendMsgToAllBS("0");
-            CloseAllClients();
-            AsynchronousSocketListener.StopListening();
+            if (isServerStarted)
+            {
+                SendMsgToAllBS("0");
+                CloseAllClients();
+                AsynchronousSocketListener.StopListening();
+            }
             Application.Current.Shutdown();
-        }        
+        }
+
     }    
 }

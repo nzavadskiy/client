@@ -38,6 +38,7 @@ namespace client
         public static System.Timers.Timer aTimer;
         System.Timers.Timer assistTimer;
         public static bool isWindowActive = false;
+        public static bool isServerStarted = false;
         SetStartParameters setStartParameters = new SetStartParameters();
         public static List<string> assistInformation;
         public static List<Client> clients;
@@ -48,4 +49,4 @@ namespace client
         CollectionView taView;
         CollectionView cellIDView;
     }
-    }
+}

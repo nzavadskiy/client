@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:client"
         mc:Ignorable="d"
         Title="Параметры" Height="200" Width="400" 
-        Closing="FormClosing" ResizeMode="NoResize" BorderBrush="White" BorderThickness="10">
+        Closing="FormClosing" ResizeMode="NoResize" BorderBrush="White" BorderThickness="10" Icon=".\images\settings.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>

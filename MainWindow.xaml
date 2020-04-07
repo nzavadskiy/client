@@ -6,7 +6,7 @@
         xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF"
         xmlns:local="clr-namespace:client"
         mc:Ignorable="d"
-        Title="Тестовый клиент" Height="450" Width="800" Closing="FormClosing" >
+        Title="Тестовый клиент" Icon=".\images\map.png" Closing="FormClosing" >    
     <Grid>
         <Grid.ColumnDefinitions> 
             <ColumnDefinition Width="*" />
@@ -18,9 +18,21 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" VerticalAlignment="Top" Height="18" Grid.ColumnSpan="3">
-            <MenuItem Header="Меню">
-                <MenuItem x:Name="menuStartTestClient" Header="Старт" Click="MenuStartTestClient_Click"></MenuItem>
+        <Menu Grid.Row="0" VerticalAlignment="Top" Height="Auto" Grid.ColumnSpan="3" >
+            <MenuItem x:Name="menuStartTestClient" Click="MenuStartTestClient_Click">
+                <MenuItem.Icon>
+                    <Image Source=".\images\start.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="menuStopTestClient" Click="MenuStopTestClient_Click">
+                <MenuItem.Icon>
+                    <Image Source=".\images\stop.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem>
+                <MenuItem.Icon>
+                    <Image Source=".\images\menu.png"/>
+                </MenuItem.Icon>
                 <MenuItem x:Name="menuGetGeoAll" Header="Определить местоположение всех абонентов">
                     <MenuItem Header="MS-Based GPS" Click="MiGetMsbGPSAll"></MenuItem>
                     <MenuItem Header="MS-Assisted GPS" Click="MiGetMsaGPSAll"></MenuItem>
@@ -29,7 +41,11 @@
                     <MenuItem Header="По параметру TA" Click="MiGetTAAll"></MenuItem>
                     <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellIDAll"></MenuItem>
                 </MenuItem>
-                <MenuItem x:Name="menuSetParams" Header="Настройка параметров запроса" Click="MenuSetParams_Click"></MenuItem>
+            </MenuItem>
+            <MenuItem x:Name="menuSetParams" Click="MenuSetParams_Click">
+                <MenuItem.Icon>
+                    <Image Source=".\images\settings.png"/>
+                </MenuItem.Icon>
             </MenuItem>
         </Menu>
         <StatusBar Grid.ColumnSpan="3" Grid.Row="2" VerticalAlignment="Bottom" Height="26">
@@ -46,11 +62,13 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <Border BorderThickness="1" BorderBrush="Gray">
+                        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="  Фильтр  "></TextBlock>
+                    </Border>
                     <ComboBox Name="cbFilterFieldsBS" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
                         <ComboBoxItem>Имя</ComboBoxItem>
                         <ComboBoxItem>MCC</ComboBoxItem>
@@ -60,6 +78,8 @@
                         <ComboBoxItem>Антенна</ComboBoxItem>
                         <ComboBoxItem>Широта</ComboBoxItem>
                         <ComboBoxItem>Долгота</ComboBoxItem>
+                        <ComboBoxItem>Высота</ComboBoxItem>
+                        <ComboBoxItem>Точность</ComboBoxItem>
                     </ComboBox>
                     <TextBox Name="tbSortFieldBS" TextChanged="tbSortFieldBS_TextChanged" Grid.Row="0" Grid.Column="2"></TextBox>
                     <ListView Name="lvBaseStations" x:FieldModifier="public" Grid.Row="1" Grid.ColumnSpan="5">                    
@@ -73,6 +93,8 @@
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=antenna}">Антенна</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=lat}">Широта</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=lon}">Долгота</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=alt}">Высота</GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=accuracy}">Точность</GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -85,11 +107,13 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <Border BorderThickness="1" BorderBrush="Gray">
+                        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="  Фильтр  "></TextBlock>
+                    </Border>                    
                     <ComboBox Name="cbFilterFieldsSub" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
                         <ComboBoxItem>IMSI</ComboBoxItem>
                         <ComboBoxItem>IMEI-SV</ComboBoxItem>
@@ -147,11 +171,13 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <Border BorderThickness="1" BorderBrush="Gray">
+                        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="  Фильтр  "></TextBlock>
+                    </Border>
                     <ComboBox Name="cbFilterFieldsGeo" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
                         <ComboBoxItem>IMSI</ComboBoxItem>
                         <ComboBoxItem>IMEI-SV</ComboBoxItem>
@@ -180,11 +206,13 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <Border BorderThickness="1" BorderBrush="Gray">
+                        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="  Фильтр  "></TextBlock>
+                    </Border>
                     <ComboBox Name="cbFilterFieldsTA" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
                         <ComboBoxItem>IMSI</ComboBoxItem>
                         <ComboBoxItem>IMEI-SV</ComboBoxItem>
@@ -213,11 +241,13 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Фильтр</TextBlock>
+                    <Border BorderThickness="1" BorderBrush="Gray">
+                        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="  Фильтр  "></TextBlock>
+                    </Border>
                     <ComboBox Name="cbFilterFieldsCellID" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Width="130" >
                         <ComboBoxItem>IMSI</ComboBoxItem>
                         <ComboBoxItem>IMEI-SV</ComboBoxItem>
