@@ -21,8 +21,8 @@ namespace client
                     {
                         Subscriber s_ = s;
                         s_.assistData = a;
-                        if (SendReceiveMessage(s_.bsName, "3" + s_.Serialize()) == "0")
-                            Logging(String.Format("Отправлены дополнительные сведения абоненту: IMSI = {0}, IMEI-SV = {1}", s.imsi, s.imeiSV));
+                        SendReceiveMessage(s_.bsName, "3" + s_.Serialize());
+                        Logging(String.Format("Отправлены дополнительные сведения абоненту: IMSI = {0}, IMEI-SV = {1}", s.imsi, s.imeiSV));
                         RenewAssistDataForSub(s);
                     }
                 }
@@ -34,8 +34,8 @@ namespace client
             {
                 Subscriber s_ = sub;
                 s_.assistData = a;
-                if (SendReceiveMessage(s_.bsName, "2" + s_.Serialize()) == "0")
-                    Logging(String.Format("Отправлены дополнительные сведения абоненту: IMSI = {0}, IMEI-SV = {1}", sub.imsi, sub.imeiSV));
+                SendReceiveMessage(s_.bsName, "2" + s_.Serialize());
+                Logging(String.Format("Отправлены дополнительные сведения абоненту: IMSI = {0}, IMEI-SV = {1}", sub.imsi, sub.imeiSV));
             }
         }
         public void RenewAssistDataPeriodically()

@@ -131,7 +131,6 @@ namespace client
                 {
                     if (g.imsi == cbMapSubs.SelectedValue.ToString())
                     {
-                        //Location pinLocation = myMap.ViewportPointToLocation(new Point(g.latitude, g.longtitude));
                         Location pinLocation = new Location(g.latitude, g.longtitude);
                         Pushpin pin = new Pushpin();
                         pin.Location = pinLocation;
@@ -143,11 +142,11 @@ namespace client
                 }
             }
         }
-        public static string SendReceiveMessage(string bsName, string msg)
+        public static void SendReceiveMessage(string bsName, string msg)
         {
             string ip = "";
             string port = "";
-            string res = "";
+            //string res = "";
             foreach (BaseStation bs in bss.Where(bs => bs.name == bsName))
             {
                 ip = bs.ip;
@@ -156,9 +155,9 @@ namespace client
             foreach (Client client in clients.Where(c => c.ipString == ip && c.portString == port))
             {
                 client.SendMessage(msg);
-                res = client.GetMessage();
+                //res = client.GetMessage();
             }
-            return res;
+            //return res;
         }
         public static void SendMsgToAllBS(string msg)
         {
@@ -232,16 +231,16 @@ namespace client
                         }
                         else // there is sub with such bs name, imsi and imei-sv - error
                         {
-                            string msg = "52" + Subs.NewSub.Serialize();
+                            string msg = "5" + Subs.NewSub.Serialize();
                             SendReceiveMessage(Subs.NewSub.bsName, msg);
                         }
                     }
                 }
-                else
-                {
-                    string msg = "51" + Subs.NewSub.Serialize();
-                    SendReceiveMessage(Subs.NewSub.bsName, msg);
-                }
+                //else
+                //{
+                //    string msg = "51" + Subs.NewSub.Serialize();
+                //    SendReceiveMessage(Subs.NewSub.bsName, msg);
+                //}
             });
         }
         public static void RemoveSub(SubscribersChange Subs)

@@ -256,7 +256,7 @@ namespace client
                     logChange.OnNext(new LogChange() { NewLog = new LogUnit(e.Message) });
                     Send(handler, "91");
                 }
-                Send(handler, "90");
+                //Send(handler, "90");
             }
         }
 

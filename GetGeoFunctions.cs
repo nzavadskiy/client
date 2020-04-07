@@ -15,8 +15,8 @@ namespace client
             sub = (Subscriber)lvSubscribers.SelectedItem;
             sub.assistData = assist;
             string msg = sub.Serialize();
-            if (SendReceiveMessage(sub.bsName, num.ToString() + msg) == "90")
-                Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
+            SendReceiveMessage(sub.bsName, num.ToString() + msg);
+            Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
         }
         private void GetGeolocationAll(string assist)
         {
@@ -27,8 +27,8 @@ namespace client
             foreach (Subscriber sub in subs)
             {
                 sub.assistData = assist;
-                if (SendReceiveMessage(sub.bsName, num.ToString() + sub.Serialize()) == "90")
-                    Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
+                SendReceiveMessage(sub.bsName, num.ToString() + sub.Serialize());
+                Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
             }
         }
         private void MiGetMsbGPS(object sender, RoutedEventArgs e)
