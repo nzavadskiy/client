@@ -1,5 +1,10 @@
 ﻿namespace client
 {
+    public class ClientChange
+    {
+        public string AddRemove { get; set; }
+        public Client NewClient { get; set; }
+    }
     public class BaseStationChange
     {
         public string AddRemove { get; set; }

@@ -15,9 +15,7 @@ namespace client
             sub = (Subscriber)lvSubscribers.SelectedItem;
             sub.assistData = assist;
             string msg = sub.Serialize();
-            Client.SendMessage(num.ToString() + msg);
-            string res = Client.GetMessage();
-            if (res == "90")
+            if (SendReceiveMessage(sub.bsName, num.ToString() + msg) == "90")
                 Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
         }
         private void GetGeolocationAll(string assist)
@@ -29,9 +27,7 @@ namespace client
             foreach (Subscriber sub in subs)
             {
                 sub.assistData = assist;
-                Client.SendMessage(num.ToString() + sub.Serialize());
-                string res = Client.GetMessage();
-                if (res == "90")
+                if (SendReceiveMessage(sub.bsName, num.ToString() + sub.Serialize()) == "90")
                     Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
             }
         }

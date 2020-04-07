@@ -18,31 +18,6 @@ using System.Text.RegularExpressions;
 
 namespace client
 {    
-    public static class Client
-    {
-        public static TcpClient client;
-        public static IPAddress ip { get; set; }
-        public static NetworkStream stream { get; set; }
-        public static void Start() { }
-        public static int SendMessage(string message)
-        {
-            Byte[] data = Encoding.ASCII.GetBytes(message);
-            stream.Write(data, 0, data.Length);
-            return 0;
-        }
-        public static string GetMessage()
-        {
-            byte[] data = new Byte[1024];
-            int bytes = stream.Read(data, 0, data.Length);
-            return Encoding.ASCII.GetString(data, 0, bytes);
-        }
-        public static void CloseClient()
-        {
-            stream.Close();
-            client.Close();
-        }
-    }
-   
     public class QueryParameters
     {
         public string responseTime; 
@@ -99,25 +74,26 @@ namespace client
                 tas = new ObservableCollection<TA>();
                 cellids = new ObservableCollection<CellID>();
                 log = new ObservableCollection<LogUnit>();
+                clients = new List<Client>();
                 bss.CollectionChanged += BS_CollectionChanged;
                 subs.CollectionChanged += Subs_CollectionChanged;
                 geos.CollectionChanged += Geos_CollectionChanged;
                 tas.CollectionChanged += TAs_CollectionChanged;
                 cellids.CollectionChanged += CellIDs_CollectionChanged;
                 log.CollectionChanged += Log_CollectionChanged;
+                
                 lvBaseStations.ItemsSource = bss;
                 lvSubscribers.ItemsSource = subs;
-
                 lvGeolocation.ItemsSource = geos;
                 lvTA.ItemsSource = tas;
                 lvCellID.ItemsSource = cellids;
                 lvLog.ItemsSource = log;
                 cbMapSubs.ItemsSource = subs;
 
-                bsView = (CollectionView)CollectionViewSource.GetDefaultView(lvSubscribers.ItemsSource);
-                bsView.GroupDescriptions.Add(new PropertyGroupDescription("bsName"));
+                bsView = (CollectionView)CollectionViewSource.GetDefaultView(lvBaseStations.ItemsSource);
                 bsView.Filter = BSFilter;
                 subView = (CollectionView)CollectionViewSource.GetDefaultView(lvSubscribers.ItemsSource);
+                subView.GroupDescriptions.Add(new PropertyGroupDescription("bsName"));
                 subView.Filter = SubFilter;
                 geoView = (CollectionView)CollectionViewSource.GetDefaultView(lvGeolocation.ItemsSource);
                 geoView.Filter = GeoFilter;
@@ -166,12 +142,106 @@ namespace client
                     }
                 }
             }
-        }        
+        }
+        public static string SendReceiveMessage(string bsName, string msg)
+        {
+            string ip = "";
+            string port = "";
+            string res = "";
+            foreach (BaseStation bs in bss.Where(bs => bs.name == bsName))
+            {
+                ip = bs.ip;
+                port = bs.port;
+            }
+            foreach (Client client in clients.Where(c => c.ipString == ip && c.portString == port))
+            {
+                client.SendMessage(msg);
+                res = client.GetMessage();
+            }
+            return res;
+        }
+        public static void SendMsgToAllBS(string msg)
+        {
+            foreach(Client client in clients)
+            {
+                client.SendMessage(msg);
+                if (msg != "0")
+                {
+                    string res = client.GetMessage();
+                }
+            }
+        }
+        public static void CloseAllClients()
+        {
+            foreach (Client client in clients)
+            {
+                client.CloseClient();
+            }
+        }
+        public static void AddNewClient(ClientChange clientChange)
+        {
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                if (!clients.Contains(clientChange.NewClient))
+                {
+                    clients.Add(clientChange.NewClient);
+                }
+            });
+        }
+        public static void RemoveClient(ClientChange clientChange)
+        {
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                if (clients.Contains(clientChange.NewClient))
+                {
+                    foreach(Client client in clients.Where(c => c.ipString == clientChange.NewClient.ipString 
+                        && c.portString == clientChange.NewClient.portString))
+                    {
+                        client.CloseClient();
+                    }
+                    clients.Remove(clientChange.NewClient);
+                }
+            });
+        }
         public static void AddNewSub(SubscribersChange Subs)
         {
             App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
-                subs.Add(Subs.NewSub);     
+                if (bss.Contains(new BaseStation(Subs.NewSub.bsName))) // no such bs
+                {
+                    if (!subs.Contains(new Subscriber(Subs.NewSub.imsi, Subs.NewSub.imeiSV))) // no such sub
+                    {
+                        Subs.NewSub.ParseClassmark();
+                        subs.Add(Subs.NewSub);
+                    }
+                    else // there is a sub with such pair imsi + imsei-sv
+                    {
+                        bool needToBeDeleted = false;
+                        foreach(Subscriber sub in subs.Where(s => s.imsi == Subs.NewSub.imsi && s.imeiSV == Subs.NewSub.imeiSV)) // get this sub
+                        {
+                            if(sub.bsName != Subs.NewSub.bsName) // sub changed bs
+                            {
+                                needToBeDeleted = true; // need change bs name by deleting and adding the new one
+                            }
+                        }
+                        if (needToBeDeleted)
+                        {
+                            subs.Remove(Subs.NewSub); //deleting by imsi + imei-sv, bs names are different
+                            Subs.NewSub.ParseClassmark();
+                            subs.Add(Subs.NewSub);
+                        }
+                        else // there is sub with such bs name, imsi and imei-sv - error
+                        {
+                            string msg = "52" + Subs.NewSub.Serialize();
+                            SendReceiveMessage(Subs.NewSub.bsName, msg);
+                        }
+                    }
+                }
+                else
+                {
+                    string msg = "51" + Subs.NewSub.Serialize();
+                    SendReceiveMessage(Subs.NewSub.bsName, msg);
+                }
             });
         }
         public static void RemoveSub(SubscribersChange Subs)
@@ -185,6 +255,12 @@ namespace client
         {
             App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
+                foreach(BaseStation bs in bss.Where(b => b.name == BSs.NewBS.name))
+                {
+                    string msg = "4" + BSs.NewBS.Serialize();
+                    SendReceiveMessage(BSs.NewBS.name, msg);
+                    return;
+                }
                 bss.Add(BSs.NewBS);
             });
         }
@@ -267,6 +343,8 @@ namespace client
         }
         private void FormClosing(object sender, CancelEventArgs e)
         {
+            SendMsgToAllBS("0");
+            CloseAllClients();
             AsynchronousSocketListener.StopListening();
             Application.Current.Shutdown();
         }        

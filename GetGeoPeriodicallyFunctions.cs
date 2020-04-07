@@ -103,9 +103,7 @@ namespace client
                 sub.assistData = "ms-based gps";
                 if (sub != null)
                 {
-                    Client.SendMessage("2" + sub.Serialize());
-                    string res = Client.GetMessage();
-                    if (res == "0")
+                    if (SendReceiveMessage(sub.bsName, "2" + sub.Serialize()) == "0")
                         Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
                 }
                 else
@@ -121,9 +119,7 @@ namespace client
                 sub.assistData = "";
                 if (sub != null)
                 {
-                    Client.SendMessage("5" + sub.Serialize());
-                    string res = Client.GetMessage();
-                    if (res == "0")
+                    if (SendReceiveMessage(sub.bsName, "5" + sub.Serialize()) == "0")
                         Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
                 }
                 else
@@ -139,9 +135,7 @@ namespace client
                 sub.assistData = "";
                 if (sub != null)
                 {
-                    Client.SendMessage("6" + sub.Serialize());
-                    string res = Client.GetMessage();
-                    if (res == "0")
+                    if (SendReceiveMessage(sub.bsName, "6" + sub.Serialize()) == "0")
                         Logging(String.Format("Отправлен запрос на определение местоположения абоненту: IMSI = {0}, IMEI_SV = {1}", sub.imsi, sub.imeiSV));
                 }
                 else

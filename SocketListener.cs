@@ -23,6 +23,7 @@ namespace client
     }
     public class AsynchronousSocketListener
     {
+        public static ISubject<ClientChange> clientChange;
         public static ISubject<BaseStationChange> bsChange;
         public static ISubject<SubscribersChange> subChange;
         public static ISubject<GeolocationChange> geoChange;
@@ -39,12 +40,15 @@ namespace client
 
         public static void StartListening()
         {
+            clientChange = new Subject<ClientChange>();
             bsChange = new Subject<BaseStationChange>();
             subChange = new Subject<SubscribersChange>();
             geoChange = new Subject<GeolocationChange>();
             taChange = new Subject<TAChange>();
             cellidChange = new Subject<CellIDChange>();
             logChange = new Subject<LogChange>();
+            clientChange.Where(c => c.AddRemove == "+").Subscribe(MainWindow.AddNewClient);
+            clientChange.Where(c => c.AddRemove == "-").Subscribe(MainWindow.RemoveClient);
             subChange.Where(c => c.AddRemove == "+").Subscribe(MainWindow.AddNewSub);
             subChange.Where(c => c.AddRemove == "-").Subscribe(MainWindow.RemoveSub);
             bsChange.Where(c => c.AddRemove == "+").Subscribe(MainWindow.AddNewBS);
@@ -142,8 +146,7 @@ namespace client
                     {
                         case '0':
                             bs = BaseStation.Deserialize(content.Substring(1));
-                            Client.client = new TcpClient(bs.ip, Int32.Parse(bs.port));
-                            Client.stream = Client.client.GetStream();
+                            clientChange.OnNext(new ClientChange() { AddRemove = "+", NewClient = new Client(bs.ip, bs.port) });
                             break;
                         case '1':
                             switch (content[1])
@@ -167,7 +170,6 @@ namespace client
                             {
                                 case '1':
                                     sub = Subscriber.Deserialize(content.Substring(2));
-                                    sub.ParseClassmark();
                                     subChange.OnNext(new SubscribersChange() { AddRemove = "+", NewSub = sub });
                                     break;
                                 case '2':
@@ -236,6 +238,7 @@ namespace client
                         case '4':
                             bs = BaseStation.Deserialize(content.Substring(1));
                             bsChange.OnNext(new BaseStationChange() { AddRemove = "-all", NewBS = bs });
+                            clientChange.OnNext(new ClientChange() { AddRemove = "-", NewClient = new Client(bs.ip, bs.port) });
                             break;
                         case '9':
                             switch (content[1])

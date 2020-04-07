@@ -40,6 +40,7 @@ namespace client
         public static bool isWindowActive = false;
         SetStartParameters setStartParameters = new SetStartParameters();
         public static List<string> assistInformation;
+        public static List<Client> clients;
 
         CollectionView bsView;
         CollectionView subView;

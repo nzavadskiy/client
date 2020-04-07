@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Json;
 using System.IO;
 using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Net.Sockets;
 
 namespace client
 {
@@ -172,6 +173,10 @@ namespace client
             this.antenna = antenna;
             this.ip = ip;
             this.port = port;
+        }
+        public BaseStation(string name)
+        {
+            this.name = name;
         }
         public string Serialize()
         {
@@ -429,5 +434,56 @@ namespace client
             return (CellID)jsonFormatter.ReadObject(stream);
         }
 
+    }
+    public class Client
+    {
+        public TcpClient client;
+        public IPAddress ip { get; set; }
+        public NetworkStream stream { get; set; }
+        public string ipString;
+        public string portString;
+        public void Start() { }
+
+        public Client() { }
+        public Client(string ip, string port)
+        {
+            ipString = ip;
+            portString = port;
+            client = new TcpClient(ip, Int32.Parse(port));
+            stream = client.GetStream();
+        }
+        public int SendMessage(string message)
+        {
+            Byte[] data = Encoding.ASCII.GetBytes(message);
+            stream.Write(data, 0, data.Length);
+            return 0;
+        }
+        public string GetMessage()
+        {
+            byte[] data = new Byte[1024];
+            int bytes = stream.Read(data, 0, data.Length);
+            return Encoding.ASCII.GetString(data, 0, bytes);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            Client c = (Client)obj;
+            return ipString == c.ipString && portString == c.portString;
+        }
+        public void CloseClient()
+        {
+            stream.Close();
+            client.Close();
+        }
+        public override int GetHashCode()
+        {
+            var hashCode = -449251652;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ipString);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(portString);
+            return hashCode;
+        }
     }
 }

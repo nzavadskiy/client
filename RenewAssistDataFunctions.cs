@@ -21,9 +21,7 @@ namespace client
                     {
                         Subscriber s_ = s;
                         s_.assistData = a;
-                        Client.SendMessage("3" + s_.Serialize());
-                        string res = Client.GetMessage();
-                        if (res == "0")
+                        if (SendReceiveMessage(s_.bsName, "3" + s_.Serialize()) == "0")
                             Logging(String.Format("Отправлены дополнительные сведения абоненту: IMSI = {0}, IMEI-SV = {1}", s.imsi, s.imeiSV));
                         RenewAssistDataForSub(s);
                     }
@@ -36,9 +34,7 @@ namespace client
             {
                 Subscriber s_ = sub;
                 s_.assistData = a;
-                Client.SendMessage("2" + s_.Serialize());
-                string res = Client.GetMessage();
-                if (res == "0")
+                if (SendReceiveMessage(s_.bsName, "2" + s_.Serialize()) == "0")
                     Logging(String.Format("Отправлены дополнительные сведения абоненту: IMSI = {0}, IMEI-SV = {1}", sub.imsi, sub.imeiSV));
             }
         }
