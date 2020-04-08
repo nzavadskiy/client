@@ -8,6 +8,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Net.Sockets;
+using System.Globalization;
 
 namespace client
 {
@@ -232,23 +233,27 @@ namespace client
         }
         public void GetBSCoord()
         {
-            string bsCoordResStr;
-            using (var client = new WebClient())
-            {
-                bsCoordResStr = client.DownloadString(String.Format("https://api.mylnikov.org/geolocation/cell?v=1.1&data=open&mcc={0}&mnc={1}&lac={2}&cellid={3}", mcc, mnc, lac, cellid));
-            }
-            dynamic bsCoordRes = JsonConvert.DeserializeObject(bsCoordResStr);
-            if (bsCoordRes.ContainsKey("data"))
-            {
-                if (bsCoordRes.data.ContainsKey("lat"))
-                {
-                    lat = bsCoordRes.data.lat;
-                }
-                if (bsCoordRes.data.ContainsKey("lon"))
-                {
-                    lon = bsCoordRes.data.lon;
-                }
-            }
+            //string bsCoordResStr;
+            //using (var client = new WebClient())
+            //{
+            //    bsCoordResStr = client.DownloadString(String.Format("https://api.mylnikov.org/geolocation/cell?v=1.1&data=open&mcc={0}&mnc={1}&lac={2}&cellid={3}", mcc, mnc, lac, cellid));
+            //}
+            //dynamic bsCoordRes = JsonConvert.DeserializeObject(bsCoordResStr);
+            //if (bsCoordRes.ContainsKey("data"))
+            //{
+            //    if (bsCoordRes.data.ContainsKey("lat"))
+            //    {
+            //        lat = bsCoordRes.data.lat;
+            //    }
+            //    if (bsCoordRes.data.ContainsKey("lon"))
+            //    {
+            //        lon = bsCoordRes.data.lon;
+            //    }
+            //}
+            var rand = new Random();            
+            lat = (rand.NextDouble() + 55).ToString(CultureInfo.InvariantCulture);
+            lon = (rand.NextDouble() + 37).ToString(CultureInfo.InvariantCulture);
+            antenna = "-" + ((rand.NextDouble() * 100 + 60) % 100).ToString(CultureInfo.InvariantCulture);
         }
         public void GetFieldsFromTAMsg(dynamic neighbourBS)
         {
@@ -414,6 +419,26 @@ namespace client
                 this.neighbours[i].GetFieldsFromTAMsg(neighbours[i]);
             }
         }
+        public void CalculateCoords()
+        {
+            double[] weights = new double[neighboursCount];
+            double sumWeights = 0;
+            double latSum = 0;
+            double lonSum = 0;
+            for (int i = 0; i < neighboursCount; i++)
+            {
+                if (neighbours[i].mcc != "")
+                {
+                    neighbours[i].GetBSCoord();
+                    double weight = Math.Pow(10, double.Parse(neighbours[i].antenna, CultureInfo.InvariantCulture) / 20.0);
+                    sumWeights += weight;
+                    latSum += weight * double.Parse(neighbours[i].lat, CultureInfo.InvariantCulture);
+                    lonSum += weight * double.Parse(neighbours[i].lon, CultureInfo.InvariantCulture);
+                }
+            }
+            lat = (latSum / sumWeights).ToString(CultureInfo.InvariantCulture);
+            lon = (lonSum / sumWeights).ToString(CultureInfo.InvariantCulture);
+        }
         public string Serialize()
         {
             DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(TA));
@@ -460,6 +485,20 @@ namespace client
             DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(CellID));
             MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonStr));
             return (CellID)jsonFormatter.ReadObject(stream);
+        }
+        public bool GetDistFromTA()
+        {
+            int intDist;
+            if(int.TryParse(dist, out intDist))
+            {
+                intDist *= 554;
+                dist = String.Format("{0} - {1} метров", intDist.ToString(), (intDist + 554).ToString());
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }

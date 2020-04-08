@@ -208,7 +208,7 @@ namespace client
                                     {
                                         ta.GetFieldsFromTAMsg(bsLevRes.neighbours);
                                     }
-                                    // calc geolocation
+                                    ta.CalculateCoords();
                                     taChange.OnNext(new TAChange() { NewTA = ta });
                                     break;
                                 case '2':
@@ -231,6 +231,7 @@ namespace client
                                     break;
                                 case '4':
                                     CellID cellid = CellID.Deserialize(content.Substring(2));
+                                    cellid.GetDistFromTA();
                                     cellidChange.OnNext(new CellIDChange() { NewCellID = cellid });
                                     break;
                             }

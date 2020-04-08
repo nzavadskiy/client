@@ -44,36 +44,6 @@
                 </MenuItem>
             </Menu>
         </ToolBar>
-        <!--<Menu Grid.Row="0" VerticalAlignment="Top" Height="Auto" Grid.ColumnSpan="3" >
-            <MenuItem x:Name="menuStartTestClient" Click="MenuStartTestClient_Click">
-                <MenuItem.Icon>
-                    <Image Source=".\images\start.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem x:Name="menuStopTestClient" Click="MenuStopTestClient_Click">
-                <MenuItem.Icon>
-                    <Image Source=".\images\stop.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem>
-                <MenuItem.Icon>
-                    <Image Source=".\images\menu.png"/>
-                </MenuItem.Icon>
-                <MenuItem x:Name="menuGetGeoAll" Header="Определить местоположение всех абонентов">
-                    <MenuItem Header="MS-Based GPS" Click="MiGetMsbGPSAll"></MenuItem>
-                    <MenuItem Header="MS-Assisted GPS" Click="MiGetMsaGPSAll"></MenuItem>
-                    <MenuItem Header="MS-Based E-OTD" Click="MiGetMsbEOTDAll"></MenuItem>
-                    <MenuItem Header="MS-Assisted E-OTD" Click="MiGetMsaEOTDAll"></MenuItem>
-                    <MenuItem Header="По параметру TA" Click="MiGetTAAll"></MenuItem>
-                    <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellIDAll"></MenuItem>
-                </MenuItem>
-            </MenuItem>
-            <MenuItem x:Name="menuSetParams" Click="MenuSetParams_Click">
-                <MenuItem.Icon>
-                    <Image Source=".\images\settings.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-        </Menu>-->
         <StatusBar Grid.ColumnSpan="3" Grid.Row="2" VerticalAlignment="Bottom" Height="26">
             <TextBlock Name="tbStatus" Foreground="Gray"/>
         </StatusBar>
@@ -190,7 +160,7 @@
                     </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="Данные о местоположении">
+            <TabItem Header="RRLP">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
@@ -225,7 +195,7 @@
                     </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="TA">
+            <TabItem Header="Levels">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
@@ -260,7 +230,7 @@
                     </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="Cell ID">
+            <TabItem Header="Cell ID + TA">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
