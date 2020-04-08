@@ -42,7 +42,7 @@ namespace client
         {
             App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
-                assistTimer = new System.Timers.Timer(float.Parse(qParams.timeRefreshEphem, CultureInfo.InvariantCulture) * 1000 * 60 * 60); assistTimer = new System.Timers.Timer(float.Parse(qParams.timeRefreshEphem, CultureInfo.InvariantCulture) * 1000 * 60 * 60);
+                assistTimer = new System.Timers.Timer(qParams.timeRefreshEphem * 1000 * 60 * 60);
                 assistTimer.Elapsed += GetAndRenewAssistData;
                 assistTimer.AutoReset = true;
                 assistTimer.Enabled = true;

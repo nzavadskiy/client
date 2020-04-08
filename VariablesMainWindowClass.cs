@@ -48,5 +48,7 @@ namespace client
         CollectionView geoView;
         CollectionView taView;
         CollectionView cellIDView;
+
+        public static Dictionary<int, int> numOfAssistsValues;
     }
 }

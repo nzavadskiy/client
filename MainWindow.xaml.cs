@@ -15,39 +15,11 @@ using System.Collections.Specialized;
 using System.Timers;
 using Microsoft.Maps.MapControl.WPF;
 using System.Text.RegularExpressions;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace client
-{    
-    public class QueryParameters
-    {
-        public string responseTime; 
-        public string accuracy;
-        public string numOfAssists;
-        public string latitude;
-        public string longtitude;
-        public string altitude;
-        public string timeRefreshAmanac;
-        public string timeRefreshEphem;
-        private const string almanacURL = "687474703a2f2f7777772e6e617663656e2e757363672e676f762f3f706167654e616d653d63757272656e74416c6d616e616326666f726d61743d79756d61";
-        private const string ephemerisURL = "6674703a2f2f6674702e7472696d626c652e636f6d2f7075622f6570682f437572526e784e2e6e6176";
-        public QueryParameters() { }
-        public QueryParameters(string rt, string acc, string num, string lat, string lon, string alt, string timeA, string timeE)
-        {
-            responseTime = rt;
-            accuracy = acc;
-            numOfAssists = num;
-            latitude = lat;
-            longtitude = lon;
-            altitude = alt;
-            timeRefreshAmanac = timeA;
-            timeRefreshEphem = timeE;
-        }
-        public string GetQuery()
-        {
-            return String.Format(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?GSM.RRLP.ACCURACY={1}&GSM.RRLP.RESPONSETIME={0}&GSM.RRLP.ALMANAC.URL={8}&GSM.RRLP.EPHEMERIS.URL={9}&GSM.RRLP.ALMANAC.REFRESH.TIME={6}&GSM.RRLP.EPHEMERIS.REFRESH.TIME={7}&GSM.RRLP.SEED.LATITUDE={3}.0&GSM.RRLP.SEED.LONGITUDE={4}.0&GSM.RRLP.SEED.ALTITUDE={5}&GSM.RRLP.ALMANAC.ASSIST.PRESENT=0&GSM.RRLP.EPHEMERIS.ASSIST.COUNT={2}&query=assist",
-                responseTime, accuracy, numOfAssists, latitude, longtitude, altitude, timeRefreshAmanac, timeRefreshEphem, almanacURL, ephemerisURL);
-        }
-    }
+{        
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -58,6 +30,21 @@ namespace client
                 setStartParameters.Show();
                 Hide();
                 isWindowActive = true;
+                numOfAssistsValues = new Dictionary<int, int>()
+                {
+                    [3] = 0,
+                    [6] = 1,
+                    [9] = 2,
+                    [12] = 3,
+                    [15] = 4,
+                    [18] = 5,
+                    [21] = 6,
+                    [24] = 7,
+                    [27] = 8,
+                    [30] = 9,
+                };
+                qParams = new QueryParameters();
+                qParams.GetParamsFromFile("..\\..\\configs\\renewAddInfo.json");
             }
         }
         private void MenuStartTestClient_Click(object sender, RoutedEventArgs e)
@@ -69,7 +56,6 @@ namespace client
                     System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvBaseStations.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
                     System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvGeolocation.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
                     System.Diagnostics.PresentationTraceSources.SetTraceLevel(lvSubscribers.ItemContainerGenerator, System.Diagnostics.PresentationTraceLevel.High);
-                    qParams = new QueryParameters("7", "7", "15", "55", "37", "0", "24", "0.1");
                     bss = new ObservableCollection<BaseStation>();
                     subs = new ObservableCollection<Subscriber>();
                     geos = new ObservableCollection<Geolocation>();

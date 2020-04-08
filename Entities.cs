@@ -514,4 +514,74 @@ namespace client
             return hashCode;
         }
     }
+    public class QueryParameters
+    {
+        public int responseTime;
+        public int accuracy;
+        public int numOfAssists;
+        public double latitude;
+        public double longtitude;
+        public int altitude;
+        public int refreshInterval;
+        public double timeRefreshAmanac;
+        public double timeRefreshEphem;
+        private const string almanacURL = "687474703a2f2f7777772e6e617663656e2e757363672e676f762f3f706167654e616d653d63757272656e74416c6d616e616326666f726d61743d79756d61";
+        private const string ephemerisURL = "6674703a2f2f6674702e7472696d626c652e636f6d2f7075622f6570682f437572526e784e2e6e6176";
+        public QueryParameters()
+        {
+            timeRefreshAmanac = 24;
+            timeRefreshEphem = 0.1;
+        }
+        public QueryParameters(int rt, int acc, int num, double lat, double lon, int alt, int refrInt)
+        {
+            responseTime = rt;
+            accuracy = acc;
+            numOfAssists = num;
+            latitude = lat;
+            longtitude = lon;
+            altitude = alt;
+            timeRefreshAmanac = 24;
+            timeRefreshEphem = 0.1;
+            refreshInterval = refrInt;
+        }
+        public void GetParamsFromFile(string fileName)
+        {
+            string content = File.ReadAllText(fileName);
+            //string content = File.ReadAllText("..\\..\\configs\\renewAddInfo.json");
+            dynamic paramsConf = JsonConvert.DeserializeObject(content);
+            if (paramsConf.ContainsKey("responseTime"))
+            {
+                responseTime = paramsConf.responseTime;
+            }
+            if (paramsConf.ContainsKey("accuracy"))
+            {
+                accuracy = paramsConf.accuracy;
+            }
+            if (paramsConf.ContainsKey("numOfAssists"))
+            {
+                numOfAssists = paramsConf.numOfAssists;
+            }
+            if (paramsConf.ContainsKey("longtitude"))
+            {
+                longtitude = paramsConf.longtitude;
+            }
+            if (paramsConf.ContainsKey("altitude"))
+            {
+                altitude = paramsConf.altitude;
+            }
+            if (paramsConf.ContainsKey("refreshInterval"))
+            {
+                refreshInterval = paramsConf.refreshInterval;
+            }
+            if (paramsConf.ContainsKey("latitude"))
+            {
+                latitude = paramsConf.latitude;
+            }
+        }
+        public string GetQuery()
+        {
+            return String.Format(@"http://192.168.70.132/cgi-bin/rrlpserver.cgi?GSM.RRLP.ACCURACY={1}&GSM.RRLP.RESPONSETIME={0}&GSM.RRLP.ALMANAC.URL={8}&GSM.RRLP.EPHEMERIS.URL={9}&GSM.RRLP.ALMANAC.REFRESH.TIME={6}&GSM.RRLP.EPHEMERIS.REFRESH.TIME={7}&GSM.RRLP.SEED.LATITUDE={3}.0&GSM.RRLP.SEED.LONGITUDE={4}.0&GSM.RRLP.SEED.ALTITUDE={5}&GSM.RRLP.ALMANAC.ASSIST.PRESENT=0&GSM.RRLP.EPHEMERIS.ASSIST.COUNT={2}&query=assist",
+                responseTime, accuracy, numOfAssists, latitude, longtitude, altitude, timeRefreshAmanac, timeRefreshEphem, almanacURL, ephemerisURL);
+        }
+    }
 }

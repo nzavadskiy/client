@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -23,6 +25,16 @@ namespace client
         public SetStartParameters()
         {
             InitializeComponent();
+            string content = File.ReadAllText("..\\..\\configs\\network.json");
+            dynamic networkConf = JsonConvert.DeserializeObject(content);
+            if (networkConf.ContainsKey("ip"))
+            {
+                tbLocalIP.Text = networkConf.ip;
+            }
+            if (networkConf.ContainsKey("port"))
+            {
+                tbLocalPort.Text = networkConf.port;
+            }
         }
         private void BtnOK_Click(object sender, RoutedEventArgs e)
         {
@@ -35,11 +47,6 @@ namespace client
             if (!int.TryParse(tbLocalPort.Text, out MainWindow.localPort))
             {
                 MessageBox.Show("Неверный формат номера порта");
-                return;
-            }
-            if (!int.TryParse(tbRenewAssistInterval.Text, out MainWindow.renewAssistInterval))
-            {
-                MessageBox.Show("Неверный формат интервала");
                 return;
             }
             mainwindow.Show();

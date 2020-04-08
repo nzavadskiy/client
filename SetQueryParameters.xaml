@@ -5,123 +5,79 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:client"
         mc:Ignorable="d"
-        Height="300" Width="400" Icon=".\images\settings.png" Title="Параметры получения дополнительной информации">
+        Icon=".\images\settings.png" Title="Параметры дополнительной информации" 
+        Width="360" Height="230" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="180"></ColumnDefinition>
+            <ColumnDefinition Width="40"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="10"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="10"></RowDefinition>
         </Grid.RowDefinitions>
-        <ComboBox Name="cbResponseTime" Grid.Row="0" HorizontalAlignment="Center" Grid.Column="1" Width="100" SelectedItem="128">
-            <ComboBoxItem>1</ComboBoxItem>
-            <ComboBoxItem>2</ComboBoxItem>
-            <ComboBoxItem>4</ComboBoxItem>
-            <ComboBoxItem>8</ComboBoxItem>
-            <ComboBoxItem>16</ComboBoxItem>
-            <ComboBoxItem>32</ComboBoxItem>
-            <ComboBoxItem>64</ComboBoxItem>
-            <ComboBoxItem IsSelected="True">128</ComboBoxItem>
-        </ComboBox>
-        <TextBox Name="tbAccuracy" Grid.Row="1" HorizontalAlignment="Center" Grid.Column="1" Width="100" PreviewTextInput="PreviewAccuracy" Text="7"></TextBox>
-        <ComboBox Name="cbNumOfAssists" Grid.Row="2" HorizontalAlignment="Center" Grid.Column="1" Width="100">
+        <TextBox Name="tbResponseTimeSeconds" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Row="0" Grid.Column="2" Width="100" IsReadOnly="True" Background="LightGray" Text="Секунды:"></TextBox>
+        <TextBox Name="tbResponseTime" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Row="0" HorizontalAlignment="Center" Grid.Column="1" Width="40" PreviewTextInput="TbResponseTime_PreviewTextInput" TextChanged="TbResponseTime_TextChanged"></TextBox>
+        <TextBox Name="tbAccuracyMeters" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Row="1" Grid.Column="2" Width="100" IsReadOnly="True" Background="LightGray" Text="Метры:"></TextBox>
+        <TextBox Name="tbAccuracy" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Row="1" HorizontalAlignment="Center" Grid.Column="1" Width="40" PreviewTextInput="PreviewAccuracy" TextChanged="TbAccuracy_TextChanged"></TextBox>
+        <ComboBox Name="cbNumOfAssists" Grid.Row="2" HorizontalAlignment="Center" Grid.Column="2" Width="100">
             <ComboBoxItem>3</ComboBoxItem>
             <ComboBoxItem>6</ComboBoxItem>
             <ComboBoxItem>9</ComboBoxItem>
             <ComboBoxItem>12</ComboBoxItem>
-            <ComboBoxItem IsSelected="True">15</ComboBoxItem>
+            <ComboBoxItem>15</ComboBoxItem>
             <ComboBoxItem>18</ComboBoxItem>
             <ComboBoxItem>21</ComboBoxItem>
             <ComboBoxItem>24</ComboBoxItem>
             <ComboBoxItem>27</ComboBoxItem>
             <ComboBoxItem>30</ComboBoxItem>
         </ComboBox>
-        <TextBox Name="tbLatitude" Grid.Row="3" HorizontalAlignment="Center" Grid.Column="1" Width="100" PreviewTextInput="PreviewLatitude" Text="55"></TextBox>
-        <TextBox Name="tbLongtitude" Grid.Row="4" HorizontalAlignment="Center" Grid.Column="1" Width="100" PreviewTextInput="PreviewLongtitude" Text="37"></TextBox>
-        <TextBox Name="tbAltitude" Grid.Row="5" HorizontalAlignment="Center" Grid.Column="1" Width="100"  PreviewTextInput="PreviewAltitude" Text="0"></TextBox>
-        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Время на ответ, секунды</TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Точность, К</TextBlock>
-        <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Content="⚠">
-            <Label.ToolTip>
-                <ToolTip Height="300" Width="Auto">
+        <TextBox Name="tbLatitude" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="3" HorizontalAlignment="Center" Grid.Column="2" Width="100" PreviewTextInput="PreviewLatitude"></TextBox>
+        <TextBox Name="tbLongtitude" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="4" HorizontalAlignment="Center" Grid.Column="2" Width="100" PreviewTextInput="PreviewLongtitude"></TextBox>
+        <TextBox Name="tbAltitude" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="5" HorizontalAlignment="Center" Grid.Column="2" Width="100"  PreviewTextInput="PreviewAltitude"></TextBox>
+        <TextBox Name="tbRenewAssistInterval" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="6" HorizontalAlignment="Center" Grid.Column="2" Width="100"  PreviewTextInput="TbRenewAssistInterval_PreviewTextInput"></TextBox>
+        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Время на ответ">
+            <TextBlock.ToolTip>
+                <ToolTip>
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">K</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">0</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">1</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">2</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center">20</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="6" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="7" HorizontalAlignment="Center" VerticalAlignment="Center">40</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="9" HorizontalAlignment="Center" VerticalAlignment="Center">60</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="10" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="11" HorizontalAlignment="Center" VerticalAlignment="Center">80</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="12" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="13" HorizontalAlignment="Center" VerticalAlignment="Center">100</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="14" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="15" HorizontalAlignment="Center" VerticalAlignment="Center">120</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="16" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="17" HorizontalAlignment="Center" VerticalAlignment="Center">127</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">Значение точности</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">0 m</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">1 m</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">2.1 m</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center">57.3 m</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="6" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="7" HorizontalAlignment="Center" VerticalAlignment="Center">443 m</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="9" HorizontalAlignment="Center" VerticalAlignment="Center">3 km</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="10" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="11" HorizontalAlignment="Center" VerticalAlignment="Center">20 km</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="12" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="13" HorizontalAlignment="Center" VerticalAlignment="Center">138 km</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="14" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="15" HorizontalAlignment="Center" VerticalAlignment="Center">927 km</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="16" HorizontalAlignment="Center" VerticalAlignment="Center">...</TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="17" HorizontalAlignment="Center" VerticalAlignment="Center">1800 km</TextBlock>
+                        <TextBlock Grid.Row="0">Левое поле: (0..7)</TextBlock>
+                        <TextBlock Grid.Row="2">Правое поле: секунды</TextBlock>
                     </Grid>
                 </ToolTip>
-            </Label.ToolTip>
-        </Label>
+            </TextBlock.ToolTip>
+        </TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Точность">
+            <TextBlock.ToolTip>
+                <ToolTip>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0">Левое поле: К (0..127)</TextBlock>
+                        <TextBlock Grid.Row="2">Правое поле: метры</TextBlock>
+                    </Grid>
+                </ToolTip>
+            </TextBlock.ToolTip>
+        </TextBlock>
         <TextBlock Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Количество спутников</TextBlock>
         <TextBlock Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Широта</TextBlock>
         <TextBlock Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Долгота</TextBlock>
-        <TextBlock Grid.Row="5" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Высота, метры</TextBlock> 
-        <Button Name="btnSetQueryParameters" Content="OK" Click="BtnSetQueryParameters_Click" Grid.Row="7" Grid.ColumnSpan="2" Width="100" HorizontalAlignment="Center"></Button>
+        <TextBlock Grid.Row="5" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Высота, метры</TextBlock>
+        <TextBlock Grid.Row="6" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Интервал обновления, минуты</TextBlock> 
+        <Button Name="btnSetQueryParameters" Content="OK" Click="BtnSetQueryParameters_Click" Grid.Row="8" Grid.ColumnSpan="3" Width="100" HorizontalAlignment="Center"></Button>
     </Grid>
 </Window>

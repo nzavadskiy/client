@@ -5,27 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:client"
         mc:Ignorable="d"
-        Title="Параметры" Height="200" Width="400" 
+        Title="Параметры" Height="180" Width="300" 
         Closing="FormClosing" ResizeMode="NoResize" BorderBrush="White" BorderThickness="10" Icon=".\images\settings.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
             <RowDefinition Height="10"></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="10"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">IP-адрес локального сервера</TextBlock>
         <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Порт локального сервера</TextBlock>
-        <TextBlock Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Интервал обновления ДИ о спутниках, мин</TextBlock>
-        <TextBox Name="tbLocalIP" Text="127.0.0.1" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Height="20"></TextBox>
-        <TextBox Name="tbLocalPort" Text="8081" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Height="20"></TextBox>
-        <TextBox Name="tbRenewAssistInterval" Text="1" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center"></TextBox>
-        <Button Content="OK" Click="BtnOK_Click"  Grid.Row="6" Grid.ColumnSpan="3" MaxWidth="100" Height="Auto"></Button>
+        <TextBox Name="tbLocalIP" Text="127.0.0.1" Height="30" Width="80" Grid.Row="0" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></TextBox>
+        <TextBox Name="tbLocalPort" Text="8081" Height="30" Width="80" Grid.Row="1" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></TextBox>
+        <Button Content="OK" Click="BtnOK_Click"  Grid.Row="6" Grid.ColumnSpan="3" Width="60" Height="Auto"></Button>
     </Grid>
 </Window>

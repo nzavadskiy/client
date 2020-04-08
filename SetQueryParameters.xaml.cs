@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,48 +23,32 @@ namespace client
         public SetQueryParameters()
         {
             InitializeComponent();
+            tbAccuracy.Text = MainWindow.qParams.accuracy.ToString();
+            cbNumOfAssists.SelectedIndex = MainWindow.numOfAssistsValues[MainWindow.qParams.numOfAssists];
+            tbLatitude.Text = MainWindow.qParams.latitude.ToString(CultureInfo.InvariantCulture);
+            tbLongtitude.Text = MainWindow.qParams.longtitude.ToString(CultureInfo.InvariantCulture);
+            tbAltitude.Text = MainWindow.qParams.altitude.ToString();
+            tbResponseTime.Text = MainWindow.qParams.responseTime.ToString();
+            tbRenewAssistInterval.Text = MainWindow.qParams.refreshInterval.ToString();
         }
         private void BtnSetQueryParameters_Click(object sender, RoutedEventArgs e)
         {
-            if (tbLatitude.Text != "" && tbLongtitude.Text != "" && tbAltitude.Text != "" && cbResponseTime.Text != "" && tbAccuracy.Text != ""
+            if (tbLatitude.Text != "" && tbLongtitude.Text != "" && tbAltitude.Text != "" && tbResponseTime.Text != "" && tbAccuracy.Text != ""
                 && cbNumOfAssists.Text != "")
             {
-                MainWindow.qParams.latitude = tbLatitude.Text;
-                MainWindow.qParams.longtitude = tbLongtitude.Text;
-                MainWindow.qParams.altitude = tbAltitude.Text;
-                switch(cbResponseTime.Text)
-                {
-                    case "1":
-                        MainWindow.qParams.responseTime = "0";
-                        break;
-                    case "2":
-                        MainWindow.qParams.responseTime = "1";
-                        break;
-                    case "4":
-                        MainWindow.qParams.responseTime = "2";
-                        break;
-                    case "8":
-                        MainWindow.qParams.responseTime = "3";
-                        break;
-                    case "16":
-                        MainWindow.qParams.responseTime = "4";
-                        break;
-                    case "32":
-                        MainWindow.qParams.responseTime = "5";
-                        break;
-                    case "64":
-                        MainWindow.qParams.responseTime = "6";
-                        break;
-                    case "128":
-                        MainWindow.qParams.responseTime = "7";
-                        break;
-                }
-                MainWindow.qParams.accuracy = tbAccuracy.Text;
-                MainWindow.qParams.numOfAssists = cbNumOfAssists.Text;
+                MainWindow.qParams.latitude = double.Parse(tbLatitude.Text, CultureInfo.InvariantCulture);
+                MainWindow.qParams.longtitude = double.Parse(tbLongtitude.Text, CultureInfo.InvariantCulture);
+                MainWindow.qParams.altitude = int.Parse(tbAltitude.Text);
+                MainWindow.qParams.responseTime = int.Parse(tbResponseTime.Text);
+                MainWindow.qParams.accuracy = int.Parse(tbAccuracy.Text);
+                MainWindow.qParams.numOfAssists = int.Parse(cbNumOfAssists.Text);
+                MainWindow.qParams.refreshInterval = int.Parse(tbRenewAssistInterval.Text);
                 this.Close();
             }
             else
+            {
                 MessageBox.Show("All fields are mandatory!");
+            }
         }
         private static bool IsInt(string text)
         {
@@ -72,6 +57,10 @@ namespace client
         private static bool IsDouble(string text)
         {
             return _regexDouble.IsMatch(text);
+        }
+        private void TbResponseTime_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsInt(e.Text);
         }
         private void PreviewAccuracy(object sender, TextCompositionEventArgs e)
         {
@@ -97,5 +86,58 @@ namespace client
         {
             e.Handled = !IsDouble(e.Text);
         }
+        private void TbRenewAssistInterval_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsInt(e.Text);
+        }
+        private void TbAccuracy_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (tbAccuracy.Text != "")
+            {
+                int value = int.Parse(tbAccuracy.Text);
+                if (value >= 0 && value <= 127)
+                {
+                    tbAccuracy.Background = Brushes.LightGreen;
+                    int metersValue = (int)(10 * (Math.Pow(1.1, value) - 1));
+                    tbAccuracyMeters.Text = "Метры: " + metersValue.ToString();
+                }
+                else
+                {
+                    tbAccuracy.Background = Brushes.Red;
+                    tbAccuracyMeters.Text = "Метры: ";
+                }
+            }
+            else
+            {
+                tbAccuracy.Background = Brushes.Red;
+                tbAccuracyMeters.Text = "Метры: ";
+            }
+        }
+
+        private void TbResponseTime_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (tbResponseTime.Text != "")
+            {
+                int value = int.Parse(tbResponseTime.Text);
+                if (value >= 0 && value <= 7)
+                {
+                    tbResponseTime.Background = Brushes.LightGreen;
+                    int metersValue = (int)(Math.Pow(2, value));
+                    tbResponseTimeSeconds.Text = "Секунды: " + metersValue.ToString();
+                }
+                else
+                {
+                    tbResponseTime.Background = Brushes.Red;
+                    tbResponseTimeSeconds.Text = "Секунды: ";
+                }
+            }
+            else
+            {
+                tbResponseTime.Background = Brushes.Red;
+                tbResponseTimeSeconds.Text = "Секунды: ";
+            }
+        }
+
+       
     }
 }

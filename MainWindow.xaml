@@ -6,7 +6,7 @@
         xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF"
         xmlns:local="clr-namespace:client"
         mc:Ignorable="d"
-        Title="Тестовый клиент" Icon=".\images\map.png" Closing="FormClosing" >    
+        Title="ПСОП GSM" Icon=".\images\map.png" Closing="FormClosing" >
     <Grid>
         <Grid.ColumnDefinitions> 
             <ColumnDefinition Width="*" />
@@ -18,7 +18,33 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" VerticalAlignment="Top" Height="Auto" Grid.ColumnSpan="3" >
+        <ToolBar Grid.Row="0" Grid.ColumnSpan="3" Height="30">
+            <Button Click="MenuStartTestClient_Click">
+                <Image Source=".\images\start.png"/>
+            </Button>
+            <Button Click="MenuStopTestClient_Click">
+                <Image Source=".\images\stop.png"/>
+            </Button>
+            <Button Click="MenuSetParams_Click">
+                <Image Source=".\images\settings.png"/>
+            </Button>
+            <Menu Height="20">
+                <MenuItem>
+                    <MenuItem.Icon>
+                        <Image Source=".\images\menu.png"/>
+                    </MenuItem.Icon>
+                    <MenuItem x:Name="menuGetGeoAll" Header="Определить местоположение всех абонентов">
+                        <MenuItem Header="MS-Based GPS" Click="MiGetMsbGPSAll"></MenuItem>
+                        <MenuItem Header="MS-Assisted GPS" Click="MiGetMsaGPSAll"></MenuItem>
+                        <MenuItem Header="MS-Based E-OTD" Click="MiGetMsbEOTDAll"></MenuItem>
+                        <MenuItem Header="MS-Assisted E-OTD" Click="MiGetMsaEOTDAll"></MenuItem>
+                        <MenuItem Header="По параметру TA" Click="MiGetTAAll"></MenuItem>
+                        <MenuItem Header="Расстояние до базовой станции" Click="MiGetCellIDAll"></MenuItem>
+                    </MenuItem>
+                </MenuItem>
+            </Menu>
+        </ToolBar>
+        <!--<Menu Grid.Row="0" VerticalAlignment="Top" Height="Auto" Grid.ColumnSpan="3" >
             <MenuItem x:Name="menuStartTestClient" Click="MenuStartTestClient_Click">
                 <MenuItem.Icon>
                     <Image Source=".\images\start.png"/>
@@ -47,7 +73,7 @@
                     <Image Source=".\images\settings.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-        </Menu>
+        </Menu>-->
         <StatusBar Grid.ColumnSpan="3" Grid.Row="2" VerticalAlignment="Bottom" Height="26">
             <TextBlock Name="tbStatus" Foreground="Gray"/>
         </StatusBar>
